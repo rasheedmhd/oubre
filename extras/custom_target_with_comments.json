@@ -1,0 +1,36 @@
+
+{
+    // the target(machine) that the kernel is built to run on
+    // the target-triple informs the compiler of what kind of output
+    // should be produced.
+    // it contains, the
+    //      1. architecture
+    //      2. vendor
+    //      3. operating system
+    // and sometimes with attaching the ABI
+    "llvm-target": "x86_64-unknown-none",
+    // defines size of various integers, floating points  and pointers
+    "data-layout": "e-m:e-i64:64-f80:128-n8:16:32:64-S128",
+    // architecture type, part of the target-triple
+    "arch": "x86_64",
+    "target-endian": "little",
+    // Rust uses for conditional compilation
+    "target-pointer-width": "64",
+    "target-c-int-width": "32",
+    // tells the compiler that this program is built for any particular OS
+    "os": "none",
+    "executables": true,
+    // We are replacing the systems linker, with the LLD linker that comes
+    // built in with rust
+    "linker-flavor": "ld.lld",
+    "linker": "rust-lld",
+    // tells the compiler never to do stack unwinding during panics
+    "panic-strategy": "abort",
+    // the redzone is an optimization built into the stack.
+    // a 128 byte space below the stack pointer, where leaf functions can store,
+    // their local variables
+    "disable-redzone": true,
+    // disabling SIMD which allows for parallel processing.
+    // floats depends on SIMD for processing so we enable soft-float
+    "features": "-mmx, -sse, +soft-float",
+}

@@ -1,0 +1,14 @@
+[unstable]
+# enables the mem feature of the compiler_builtins crate
+# so no_mangle attribute is applied on memcpy, memset, memcmp, etc implementations
+build-std-features = ["compiler-builtins-mem"]
+build-std = ["core", "compiler_builtins"]
+
+# overriding the build target
+# the target that we are compiling for
+[build]
+target = "x86_64-oubre_os.json"
+
+# applies to all targets whose "os" field is set to "none"
+[target.'cfg(target_os = "none")']
+runner = "bootimage runner"

@@ -1,0 +1,96 @@
+After setting up the .cargo/config.toml,
+and installing the rust source using
+`rustup component add rust-src`
+I was supposed to rerun the build command `cargo build --target x86_64-oubre_os.json`
+this was supposed to compile the code since we now recompiled
+`core` and `compiler-builtins` but it didn't succeed,
+
+====================
+I got the same error
+====================
+`
+cargo build --target x86_64-oubre_os.json
+warning: unused manifest key: package.author
+   Compiling oubre_os v0.1.0 (/Users/Starlet/Dev/oubre_os)
+error[E0463]: can't find crate for `core`
+  |
+  = note: the `x86_64-oubre_os` target may not be installed
+  = help: consider downloading the target with `rustup target add x86_64-oubre_os`
+  = help: consider building the standard library from source with `cargo build -Zbuild-std`
+
+error[E0463]: can't find crate for `compiler_builtins`
+
+error[E0463]: can't find crate for `core`
+ --> src/main.rs:7:5
+  |
+7 | use core::panic::PanicInfo;
+  |     ^^^^ can't find crate
+  |
+  = note: the `x86_64-oubre_os` target may not be installed
+  = help: consider downloading the target with `rustup target add x86_64-oubre_os`
+  = help: consider building the standard library from source with `cargo build -Zbuild-std`
+
+error: requires `sized` lang_item
+
+For more information about this error, try `rustc --explain E0463`.
+error: could not compile `oubre_os` due to 4 previous errors
+`
+============================
+Using this tutorial,
+https://doc.rust-lang.org/nightly/cargo/reference/unstable.html#build-std
+============================
+I ran
+`cargo +nightly run -Z build-std --target x86_64-oubre_os.json`
+
+and got this output, the compilation was successful, or atleast, it seems so.
+
+warning: unused manifest key: package.author
+  Downloaded getopts v0.2.21
+  Downloaded unicode-width v0.1.10
+  Downloaded compiler_builtins v0.1.85
+  Downloaded cc v1.0.76
+  Downloaded 4 crates (265.1 KB) in 2.58s
+   Compiling compiler_builtins v0.1.85
+   Compiling core v0.0.0 (/Users/Starlet/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/core)
+   Compiling libc v0.2.138
+   Compiling cc v1.0.76
+   Compiling memchr v2.5.0
+   Compiling std v0.0.0 (/Users/Starlet/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/std)
+   Compiling unwind v0.0.0 (/Users/Starlet/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/unwind)
+   Compiling rustc-std-workspace-core v1.99.0 (/Users/Starlet/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/rustc-std-workspace-core)
+   Compiling alloc v0.0.0 (/Users/Starlet/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/alloc)
+   Compiling cfg-if v1.0.0
+   Compiling adler v1.0.2
+   Compiling rustc-demangle v0.1.21
+   Compiling rustc-std-workspace-alloc v1.99.0 (/Users/Starlet/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/rustc-std-workspace-alloc)
+   Compiling panic_unwind v0.0.0 (/Users/Starlet/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/panic_unwind)
+   Compiling panic_abort v0.0.0 (/Users/Starlet/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/panic_abort)
+   Compiling gimli v0.26.1
+   Compiling std_detect v0.1.5 (/Users/Starlet/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/stdarch/crates/std_detect)
+   Compiling miniz_oxide v0.5.3
+   Compiling hashbrown v0.12.3
+   Compiling object v0.29.0
+   Compiling addr2line v0.17.0
+   Compiling proc_macro v0.0.0 (/Users/Starlet/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/proc_macro)
+   Compiling oubre_os v0.1.0 (/Users/Starlet/Dev/oubre_os)
+    Finished dev [unoptimized + debuginfo] target(s) in 32.72s
+     Running `target/x86_64-oubre_os/debug/oubre_os`
+target/x86_64-oubre_os/debug/oubre_os: target/x86_64-oubre_os/debug/oubre_os: cannot execute binary file
+
+
+===========
+[EDIT]
+===========
+
+NOW `cargo build --target x86_64-oubre_os.json` is working.
+There was a little typo in the
+.cargo/config.toml
+
+I typed `ustable` instead of `unstable`  - WHEWWW
+
+running it now prints,
+`
+warning: unused manifest key: package.author
+   Compiling oubre_os v0.1.0 (/Users/Starlet/Dev/oubre_os)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.77s
+`
