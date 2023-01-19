@@ -50,16 +50,16 @@ impl ColorCode {
 // exactly like in C which guarantees the right field ordering
 #[repr(C)]
 // the text buffer is a 2D array
-// ArrayChar represents a single item to print in the array 
+// ScreenChar represents a single item to print in the array
 // which is the buffer
-struct ArrayChar {
+struct ScreenChar {
     char_to_print: u8,
     color_code: ColorCode,
 }
 
-impl ArrayChar {
+impl ScreenChar {
     fn new(char: u8) -> Self {
-        ArrayChar {
+        ScreenChar {
             char_to_print: char,
             color_code: ColorCode::new(Color::Green, Color::Black),
         }
@@ -71,22 +71,21 @@ const VGA_BUFFER_WIDTH: usize = 80;
 
 // Guarantees that Buffer is laid out in memory exactly like its one Field, chars
 #[repr(transparent)] 
-
 struct Buffer {
     //chars: [[ScreenChar; VGA_BUFFER_WIDTH]; VGA_BUFFER_HEIGHT],
-    // wrapping ArrayChar with Volatile which uses read/write_volatile under the
+    // wrapping ScreenChar with Volatile which uses read/write_volatile under the
     // hood to prevent the compiler from optimizing the write to the buffer
     // away since we are writing only once without reading.
-    chars: [[Volatile<ArrayChar>; VGA_BUFFER_WIDTH]; VGA_BUFFER_HEIGHT],
+    chars: [[Volatile<ScreenChar>; VGA_BUFFER_WIDTH]; VGA_BUFFER_HEIGHT],
 }
 
-pub struct PrintToScreen {
+pub struct Screen {
     cursor_position: usize,
     //color_code: ColorCode,
     buffer: &'static mut Buffer,
 }
 
-impl PrintToScreen {
+impl Screen {
     pub fn print_byte(&mut self, byte: u8) {
         match byte {
             // if the byte value is a '\n' we call new_line() 
@@ -103,9 +102,9 @@ impl PrintToScreen {
                 let col = self.cursor_position;
 
                 //let color_code = self.color_code;
-                self.buffer.chars[row][col].write(ArrayChar::new(byte));
+                self.buffer.chars[row][col].write(ScreenChar::new(byte));
                 // writing a new ScreenChar to the buffer
-                // self.buffer.chars[row][col].write(ArrayChar {
+                // self.buffer.chars[row][col].write(ScreenChar {
                 //     char_to_print: byte,
                 //     color_code,
                 // });
@@ -146,7 +145,7 @@ impl PrintToScreen {
      fn clear_row(&mut self, row: usize) { /* TODO */ }
 }
 
-impl fmt::Write for PrintToScreen {
+impl fmt::Write for Screen {
     fn write_str(&mut self, s: &str) -> fmt::Result {
         self.print_string(s);
         Ok(())
@@ -155,7 +154,7 @@ impl fmt::Write for PrintToScreen {
 
 pub fn print_something() {
     use core::fmt::Write;
-    let mut screen_printer = PrintToScreen {
+    let mut screen_printer = Screen {
         cursor_position: 0,
         //color_code: ColorCode::new(Color::LightGreen, Color::Black),
         // set the buffer to the VGA text buffer address as a mutable raw pointer
