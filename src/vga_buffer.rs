@@ -1,5 +1,31 @@
 use volatile::Volatile;
 use core::fmt;
+use lazy_static::lazy_static;
+use spin::Mutex;
+
+lazy_static! {
+    pub static ref PRINTER: Mutex<Screen> = Mutex::new(Screen {
+        cursor_position: 0,
+        buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
+    });
+}
+#[macro_export]
+macro_rules! print {
+    ($($arg:tt)*) => ($crate::vga_buffer::_print(format_args!($($arg)*)));
+}
+
+#[macro_export]
+macro_rules! println {
+    () => ($crate::print!("\n"));
+    ($($arg:tt)*) => ($crate::print!("{}\n", format_args!($($arg)*)));
+}
+
+#[doc(hidden)]
+pub fn _print(args: fmt::Arguments) {
+    use core::fmt::Write;
+    PRINTER.lock().write_fmt(args).unwrap();
+}
+
 
 #[allow(dead_code)] // disabling compiler warnings for unused codes
 // like for structs, the compiler implements some Traits for enums, 
@@ -135,14 +161,22 @@ impl Screen {
         for row in 1..VGA_BUFFER_HEIGHT {
             for col in 0..VGA_BUFFER_WIDTH {
                 let character = self.buffer.chars[row][col].read();
-                self.buffer.chars[row -1][col].write(character);
+                self.buffer.chars[row - 1][col].write(character);
             }
         }
         self.clear_row(VGA_BUFFER_HEIGHT - 1);
         self.cursor_position = 0;
      }
 
-     fn clear_row(&mut self, row: usize) { /* TODO */ }
+     fn clear_row(&mut self, row: usize) {
+        let blank = ScreenChar {
+            char_to_print: b' ',
+            color_code: ColorCode::new(Color::Green, Color::Black),
+        };
+        for col in 0..VGA_BUFFER_WIDTH {
+            self.buffer.chars[row][col].write(blank);
+        }
+      }
 }
 
 impl fmt::Write for Screen {
@@ -152,19 +186,20 @@ impl fmt::Write for Screen {
     }
 }
 
-pub fn print_something() {
-    use core::fmt::Write;
-    let mut screen_printer = Screen {
-        cursor_position: 0,
-        //color_code: ColorCode::new(Color::LightGreen, Color::Black),
-        // set the buffer to the VGA text buffer address as a mutable raw pointer
-        // dereference it - meaning return the memory address pointed to by the raw pointer,
-        // and borrow it mutably - so you can read/write to to.
-        buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
-    };
+//pub fn print_something() {
+//    use core::fmt::Write;
+//    let mut screen_printer = Screen {
+//        cursor_position: 0,
+//        //color_code: ColorCode::new(Color::LightGreen, Color::Black),
+//        // set the buffer to the VGA text buffer address as a mutable raw pointer
+//        // dereference it - meaning return the memory address pointed to by the raw pointer,
+//        // and borrow it mutably - so you can read/write to to.
+//        buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
+//    };
+//
+//    screen_printer.print_byte(b'S');
+//    screen_printer.print_string("alut! ");
+//    //writer.write_string(" Wörld!");
+//    write!(screen_printer, "The planets are {} and {}", 42, 1.0/3.0).unwrap();
+//}
 
-    screen_printer.print_byte(b'H');
-    screen_printer.print_string("ello! ");
-    //writer.write_string(" Wörld!");
-    write!(screen_printer, "The numbers are {} and {}", 42, 1.0/3.0).unwrap();
-}

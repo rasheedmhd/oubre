@@ -22,7 +22,13 @@ mod vga_buffer;
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
 
-    vga_buffer::print_something();
+    println!("Hello World{}", "!");
+
+    //panic!("{}", "Roses are red, error occured at '{' ;)");
+
+    // use core::fmt::Write;
+    // vga_buffer::PRINTER.lock().write_str("Hello again").unwrap();
+    // write!(vga_buffer::PRINTER.lock(), ", some numbers: {} {}", 42, 222.1567).unwrap();
 
     // let vga_buffer = 0xb8000 as *mut u8;
 
@@ -38,7 +44,8 @@ pub extern "C" fn _start() -> ! {
 
 /// This function is called on panic.
 #[panic_handler]
-fn panic(_info: &PanicInfo) -> ! {
+fn panic(info: &PanicInfo) -> ! {
+    println!("{}", info);
     loop {}
 }
 
