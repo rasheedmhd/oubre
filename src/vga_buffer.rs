@@ -87,7 +87,7 @@ impl ScreenChar {
     fn new(char: u8) -> Self {
         ScreenChar {
             char_to_print: char,
-            color_code: ColorCode::new(Color::Green, Color::Black),
+            color_code: ColorCode::new(Color::Black, Color::LightGray),
         }
     }
 }
