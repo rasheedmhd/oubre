@@ -4,11 +4,20 @@ use lazy_static::lazy_static;
 use spin::Mutex;
 
 lazy_static! {
-    pub static ref PRINTER: Mutex<Screen> = Mutex::new(Screen {
-        cursor_position: 0,
-        buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
-    });
+    pub static ref PRINTER: Mutex<Screen> = {
+        let mut screen = Screen {
+            cursor_position: 0,
+            blank_char: ScreenChar {
+                char_to_print: b' ',
+                color_code: ColorCode::new(Color::LightBlue, Color::LightBlue),
+            },
+            buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
+        };
+        screen.paint_background();
+        Mutex::new(screen)
+    };
 }
+
 #[macro_export]
 macro_rules! print {
     ($($arg:tt)*) => ($crate::vga_buffer::_print(format_args!($($arg)*)));
@@ -87,7 +96,7 @@ impl ScreenChar {
     fn new(char: u8) -> Self {
         ScreenChar {
             char_to_print: char,
-            color_code: ColorCode::new(Color::Black, Color::LightGray),
+            color_code: ColorCode::new(Color::White, Color::LightBlue),
         }
     }
 }
@@ -108,10 +117,20 @@ struct Buffer {
 pub struct Screen {
     cursor_position: usize,
     //color_code: ColorCode,
+    blank_char: ScreenChar,
     buffer: &'static mut Buffer,
 }
 
 impl Screen {
+
+    pub fn paint_background(&mut self) {
+        for col in 0..VGA_BUFFER_HEIGHT {
+            for row in 0..VGA_BUFFER_WIDTH {
+                self.buffer.chars[col][row].write(self.blank_char);
+            }
+        }
+    }
+
     pub fn print_byte(&mut self, byte: u8) {
         match byte {
             // if the byte value is a '\n' we call new_line() 
@@ -169,12 +188,8 @@ impl Screen {
      }
 
      fn clear_row(&mut self, row: usize) {
-        let blank = ScreenChar {
-            char_to_print: b' ',
-            color_code: ColorCode::new(Color::Green, Color::Black),
-        };
         for col in 0..VGA_BUFFER_WIDTH {
-            self.buffer.chars[row][col].write(blank);
+            self.buffer.chars[row][col].write(self.blank_char);
         }
       }
 }
