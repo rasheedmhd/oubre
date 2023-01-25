@@ -122,6 +122,7 @@ pub struct Screen {
     buffer: &'static mut Buffer,
 }
 
+
 impl Screen {
 
     pub fn paint_background(&mut self) {
@@ -139,10 +140,32 @@ impl Screen {
             color_code: ColorCode::new(Color::White, Color::LightBlue),
         };
 
+        let border_left_corner = ScreenChar {
+            char_to_print: 0xc9,
+            color_code: ColorCode::new(Color::White, Color::LightBlue),
+        };
+
+        let border_right_corner = ScreenChar {
+            char_to_print: 0xbb,
+            color_code: ColorCode::new(Color::White, Color::LightBlue),
+        };
+
         for row in 0..VGA_BUFFER_HEIGHT - 23 {
             for col in 1..VGA_BUFFER_WIDTH - 1 {
                 self.buffer.chars[row][col].write(border_line);
             }
+        }
+
+        for row in 0..VGA_BUFFER_HEIGHT - 23 {
+            //for col in 1..VGA_BUFFER_WIDTH -  {
+                self.buffer.chars[row][0].write(border_left_corner);
+           // }
+        }
+
+        for row in 0..VGA_BUFFER_HEIGHT - 23 {
+            //for col in 1..VGA_BUFFER_WIDTH -  {
+                self.buffer.chars[row][79].write(border_right_corner);
+           // }
         }
     }
 
