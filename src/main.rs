@@ -22,23 +22,23 @@ mod vga_buffer;
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
 
-    // println!(
-    //     "
-    //         @boot 
-    //         New Boot, Works on x86_64 arch machines
-    //         : rl(0,0)rV0.00.01 Oubre OS
-    //         Display size: 80 * 25
-    //         mem = 2222.1567
-    //         # login root
-    //         Password: *******
-    //         TopRank Maverick Systems v0.00.01
-    //         --------------------------------
+//     println!(
+//         "
+// @boot 
+// New Boot, Works on x86_64 arch machines
+// : rl(0,0)rV0.00.01 Oubre OS
+// Display size: 80 * 25
+// mem = 2222.1567
+// # login root
+// Password: *******
+// TopRank Maverick Systems v0.00.01
+// --------------------------------
 
-    //         You have mail [+1]>
+// You have mail [+1]>
 
-    //         Hello World!
-    //     "
-    // );
+// Hello World!
+//         "
+//     );
 
     println!("Hello World{}", "!");
 

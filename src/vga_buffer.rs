@@ -230,15 +230,16 @@ impl Screen {
             // with characters
             // if it is full we create a new line.
             byte => {
+
                 if self.cursor_position >= VGA_BUFFER_WIDTH {
                     self.new_line();
                 }
 
-                let row = VGA_BUFFER_HEIGHT - 4;
+                let row = VGA_BUFFER_HEIGHT;
                 let col = self.cursor_position;
 
                 //let color_code = self.color_code;
-                self.buffer.chars[row][col].write(ScreenChar::new(byte));
+                self.buffer.chars[row - 4][col + 4 ].write(ScreenChar::new(byte));
                 // writing a new ScreenChar to the buffer
                 // self.buffer.chars[row][col].write(ScreenChar {
                 //     char_to_print: byte,
