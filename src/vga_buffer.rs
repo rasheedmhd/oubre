@@ -14,6 +14,7 @@ lazy_static! {
             buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
         };
         screen.paint_background();
+        screen.draw_border();
         Mutex::new(screen)
     };
 }
@@ -124,9 +125,23 @@ pub struct Screen {
 impl Screen {
 
     pub fn paint_background(&mut self) {
-        for col in 0..VGA_BUFFER_HEIGHT {
-            for row in 0..VGA_BUFFER_WIDTH {
-                self.buffer.chars[col][row].write(self.blank_char);
+        for row in 0..VGA_BUFFER_HEIGHT {
+            for col in 0..VGA_BUFFER_WIDTH {
+                self.buffer.chars[row][col].write(self.blank_char);
+            }
+        }
+    }
+
+    pub fn draw_border(&mut self) {
+
+        let border_line = ScreenChar {
+            char_to_print: 0xcd,
+            color_code: ColorCode::new(Color::White, Color::LightBlue),
+        };
+
+        for row in 0..VGA_BUFFER_HEIGHT - 23 {
+            for col in 1..VGA_BUFFER_WIDTH - 1 {
+                self.buffer.chars[row][col].write(border_line);
             }
         }
     }
@@ -185,13 +200,13 @@ impl Screen {
         }
         self.clear_row(VGA_BUFFER_HEIGHT - 1);
         self.cursor_position = 0;
-     }
+    }
 
-     fn clear_row(&mut self, row: usize) {
+    fn clear_row(&mut self, row: usize) {
         for col in 0..VGA_BUFFER_WIDTH {
             self.buffer.chars[row][col].write(self.blank_char);
         }
-      }
+    }
 }
 
 impl fmt::Write for Screen {
