@@ -140,6 +140,11 @@ impl Screen {
             color_code: ColorCode::new(Color::White, Color::LightBlue),
         };
 
+        let vertical_border_line = ScreenChar {
+            char_to_print: 0xba,
+            color_code: ColorCode::new(Color::White, Color::LightBlue),
+        };
+
         let border_left_corner = ScreenChar {
             char_to_print: 0xc9,
             color_code: ColorCode::new(Color::White, Color::LightBlue),
@@ -150,22 +155,70 @@ impl Screen {
             color_code: ColorCode::new(Color::White, Color::LightBlue),
         };
 
+        let border_btm_left_corner = ScreenChar {
+            char_to_print: 0xc8,
+            color_code: ColorCode::new(Color::White, Color::LightBlue),
+        };
+
+        let border_btm_right_corner = ScreenChar {
+            char_to_print: 0xbc,
+            color_code: ColorCode::new(Color::White, Color::LightBlue),
+        };
+
+        // draws the line at the top of the border (with ═)
         for row in 0..VGA_BUFFER_HEIGHT - 23 {
             for col in 1..VGA_BUFFER_WIDTH - 1 {
                 self.buffer.chars[row][col].write(border_line);
             }
         }
 
+        // draws the top left edge of the border (with ╔)
         for row in 0..VGA_BUFFER_HEIGHT - 23 {
-            //for col in 1..VGA_BUFFER_WIDTH -  {
-                self.buffer.chars[row][0].write(border_left_corner);
-           // }
+            for col in 0..VGA_BUFFER_WIDTH - 79  {
+                self.buffer.chars[row][col].write(border_left_corner);
+           }
         }
 
+        // draws the top right edge of the border (with ╗)
         for row in 0..VGA_BUFFER_HEIGHT - 23 {
-            //for col in 1..VGA_BUFFER_WIDTH -  {
-                self.buffer.chars[row][79].write(border_right_corner);
-           // }
+            for col in 79..VGA_BUFFER_WIDTH  {
+                self.buffer.chars[row][col].write(border_right_corner);
+           }
+        }
+
+        // draws the dottom left edge of the border (with ╚)
+        for row in 24..VGA_BUFFER_HEIGHT {
+            for col in 0..VGA_BUFFER_WIDTH - 79  {
+                self.buffer.chars[row][col].write(border_btm_left_corner);
+           }
+        }
+
+        // draws the bottom right edge of the border (with ╝)
+        for row in 24..VGA_BUFFER_HEIGHT {
+            for col in 79..VGA_BUFFER_WIDTH {
+                self.buffer.chars[row][col].write(border_btm_right_corner);
+           }
+        }
+
+        // draws the left vertical border line (with ║)
+        for row in 2..VGA_BUFFER_HEIGHT - 1 {
+            for col in 0..VGA_BUFFER_WIDTH - 79 {
+                self.buffer.chars[row][col].write(vertical_border_line);
+           }
+        }
+
+        // draws the right vertical border line (With ║)
+        for row in 2..VGA_BUFFER_HEIGHT - 1 {
+            for col in 79..VGA_BUFFER_WIDTH {
+                self.buffer.chars[row][col].write(vertical_border_line);
+            }
+        }
+
+        // drawing the bottom line of the border (with ═)
+        for row in 24..VGA_BUFFER_HEIGHT {
+            for col in 1..VGA_BUFFER_WIDTH - 1 {
+                self.buffer.chars[row][col].write(border_line);
+            }
         }
     }
 
@@ -181,7 +234,7 @@ impl Screen {
                     self.new_line();
                 }
 
-                let row = VGA_BUFFER_HEIGHT - 1;
+                let row = VGA_BUFFER_HEIGHT - 4;
                 let col = self.cursor_position;
 
                 //let color_code = self.color_code;
@@ -195,6 +248,7 @@ impl Screen {
             }
         }
     }
+    
     // to write strings we first convert it into bytes and write 
     // byte by byte 
     pub fn print_string(&mut self, s: &str) {
