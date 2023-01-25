@@ -1,5 +1,10 @@
 // not linking the std lib
 #![no_std]
+// rust has a test framework that it provides by default but the framework, it built into the std lib
+// depending on the test crate
+// since we are not linking the std lib, we need to spin up our own custom test framework
+#![feature(custom_test_frameworks)]
+#![test_runner(crate::test_runner)]
 
 // Overwriting all Rust-level Entry Points
 #![no_main]
@@ -67,4 +72,11 @@ fn panic(info: &PanicInfo) -> ! {
     loop {}
 }
 
+#[cfg(test)]
+fn test_runner(tests: &[&dyn Fn()]) {
+    println!("Running {} tests", tests.len());
+    for test in tests {
+        test();
+    }
+}
 
