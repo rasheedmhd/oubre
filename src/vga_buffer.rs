@@ -34,6 +34,7 @@ pub fn _print(args: fmt::Arguments) {
     use core::fmt::Write;
     PRINTER.lock().write_fmt(args).unwrap();
     PRINTER.lock().draw_border();
+
 }
 
 
@@ -148,7 +149,7 @@ impl Screen {
         // when row == VGA_BUFFER_HEIGHT - 1
         //      draw 0xc8 in column 0
         //      draw 0xbc in VGA_BUFFER_WIDTH - 1
-        for col in 0..VGA_BUFFER_WIDTH {
+        for col in 1..VGA_BUFFER_WIDTH - 1 {
             self.buffer.chars[row][col].write(screenchar);
         }
         if row == 0 {
@@ -164,7 +165,7 @@ impl Screen {
 
     fn draw_vertical_border(&mut self, screenchar: ScreenChar, row: usize) {
         self.buffer.chars[row][0].write(screenchar);
-        self.buffer.chars[row][VGA_BUFFER_WIDTH-1].write(screenchar);
+        self.buffer.chars[row][VGA_BUFFER_WIDTH - 1].write(screenchar);
     }
 
     pub fn draw_border(&mut self) {
