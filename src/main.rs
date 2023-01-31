@@ -3,8 +3,16 @@
 // rust has a test framework that it provides by default but the framework, it built into the std lib
 // depending on the test crate
 // since we are not linking the std lib, we need to spin up our own custom test framework
+
+// THE CUSTOM TEST FRAMEWORKS
+//     Generates a main func that calls the test_runner
+//     But this is ignored bc of #![no_main] 
+//     so we need to define an entry point
+//     which we can call in _start
 #![feature(custom_test_frameworks)]
 #![test_runner(crate::test_runner)]
+//  test_runner entry point 
+#![reexport_test_harness_main = "test_main"]
 
 // Overwriting all Rust-level Entry Points
 #![no_main]
@@ -12,9 +20,27 @@
 use core::panic::PanicInfo;
 
 mod vga_buffer;
+mod serial;
 
+// the Success and Failed codes can  be any arbitrary numbers
+// as long as they aren't already used by QeMu
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(u32)]
+pub enum QemuExitCode {
+    Success = 0x10,
+    Failed = 0x11,
+}
+
+pub fn exit_qemu(exit_code: QemuExitCode) {
+    use x86_64::instructions::port::Port;
+
+    unsafe {
+        let mut port = Port::new(0xf4);
+        port.write(exit_code as u32);
+    }
+}
 // telling the compiler not to mangle the function name
-// mangling or decorating is a tecnique used in compiler
+// mangling or decorating is a technique used in compiler
 // design to ensure that the compiler has unique names to
 // variable bindings, function names etc
 //https://en.wikipedia.org/wiki/Name_mangling
@@ -49,7 +75,7 @@ Hello World!
 
  //   println!("Hello World{}", "!");
 
-    //panic!("{}", "Roses are red, error occured at '{' ;)");
+    //panic!("{}", "Roses are red, error occurred at '{' ;)");
 
     // use core::fmt::Write;
     // vga_buffer::PRINTER.lock().write_str("Hello again").unwrap();
@@ -64,21 +90,71 @@ Hello World!
     //     }
     // }
 
+    // calling our test entry point
+    // annotating it to run in only test contexts
+    #[cfg(test)]
+    test_main();
+
     loop {}
 }
 
 /// This function is called on panic.
+#[cfg(not(test))]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     println!("{}", info);
     loop {}
 }
 
+// A panic fn that prints to the host OS console using (UART)
+// Universal Async Receiver - Transmitter to communicate to it 
 #[cfg(test)]
-fn test_runner(tests: &[&dyn Fn()]) {
-    println!("Running {} tests", tests.len());
+#[panic_handler]
+fn panic(info: &PanicInfo) -> ! {
+    serial_println!("[failed]\n");
+    serial_println!("Error: {}\n", info);
+    exit_qemu(QemuExitCode::Failed);
+    loop {}
+}
+
+#[cfg(test)]
+fn test_runner(tests: &[&dyn Testable]) {
+    serial_println!("Running {} tests", tests.len());
+    //[...]
+    // println!("Running {} tests", tests.len());
     for test in tests {
-        test();
+        test.run();
+    }
+    exit_qemu(QemuExitCode::Success);
+}
+
+#[test_case]
+fn trivial_assertion() {
+    // serial_print!("trivial assertion... ");
+    assert_eq!(1, 1);
+    // serial_println!("[ok]");
+
+    // when a test runs and encounters a problem where the test is not able to
+    // exit, the bootimage has a 5 mins time for it after which it will exit by force as failed. We can change that time in Cargo.toml
+    // loop {}
+}
+
+pub trait Testable {
+    fn run(&self) -> ();
+}
+
+// implement a Testable trait for an type that can be called like a function
+impl<T> Testable for T 
+where 
+    T: Fn(),
+{
+    fn run(&self) {
+        // prints a string of the name of the test function
+        serial_print!("{}...\t", core::any::type_name::<T>());
+        // runs the test function
+        self();
+        serial_println!("[ok]");
     }
 }
+
 

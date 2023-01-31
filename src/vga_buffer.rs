@@ -34,7 +34,6 @@ pub fn _print(args: fmt::Arguments) {
     use core::fmt::Write;
     PRINTER.lock().write_fmt(args).unwrap();
     PRINTER.lock().draw_border();
-
 }
 
 
