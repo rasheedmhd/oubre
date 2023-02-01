@@ -42,7 +42,7 @@ pub fn _print(args: fmt::Arguments) {
 // but we have to ask first using the #[derive()] attribute
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 // in memory rust stores C-style enums as integers the smallest integer value
-// that can accomodate the variant is used but we can tell rust the 
+// that can accommodate the variant is used but we can tell rust the 
 // the integer value that we want it to use with #[repr()] attribute
 // here we tell rust to store our enum variants in memory as u8 integers
 #[repr(u8)]
@@ -101,7 +101,7 @@ impl ScreenChar {
         }
     }
 }
-// Defining the bounderies of the text buffer - 2d array 
+// Defining the boundaries of the text buffer - 2d array 
 const VGA_BUFFER_HEIGHT: usize = 25;
 const VGA_BUFFER_WIDTH: usize = 80;
 

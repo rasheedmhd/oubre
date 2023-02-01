@@ -1,44 +1,35 @@
 // not linking the std lib
 #![no_std]
-// rust has a test framework that it provides by default but the framework, it built into the std lib
-// depending on the test crate
-// since we are not linking the std lib, we need to spin up our own custom test framework
-
-// THE CUSTOM TEST FRAMEWORKS
-//     Generates a main func that calls the test_runner
-//     But this is ignored bc of #![no_main] 
-//     so we need to define an entry point
-//     which we can call in _start
-#![feature(custom_test_frameworks)]
-#![test_runner(crate::test_runner)]
-//  test_runner entry point 
-#![reexport_test_harness_main = "test_main"]
 
 // Overwriting all Rust-level Entry Points
 #![no_main]
+#![feature(custom_test_frameworks)]
+#![test_runner(oubre_os::test_runner)]
+#![reexport_test_harness_main = "test_main"]
 
 use core::panic::PanicInfo;
+use oubre_os::println;
 
-mod vga_buffer;
-mod serial;
+// mod vga_buffer;
+// mod serial;
 
 // the Success and Failed codes can  be any arbitrary numbers
 // as long as they aren't already used by QeMu
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u32)]
-pub enum QemuExitCode {
-    Success = 0x10,
-    Failed = 0x11,
-}
+// #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+// #[repr(u32)]
+// pub enum QemuExitCode {
+//     Success = 0x10,
+//     Failed = 0x11,
+// }
 
-pub fn exit_qemu(exit_code: QemuExitCode) {
-    use x86_64::instructions::port::Port;
+// pub fn exit_qemu(exit_code: QemuExitCode) {
+//     use x86_64::instructions::port::Port;
 
-    unsafe {
-        let mut port = Port::new(0xf4);
-        port.write(exit_code as u32);
-    }
-}
+//     unsafe {
+//         let mut port = Port::new(0xf4);
+//         port.write(exit_code as u32);
+//     }
+// }
 // telling the compiler not to mangle the function name
 // mangling or decorating is a technique used in compiler
 // design to ensure that the compiler has unique names to
@@ -55,7 +46,7 @@ pub extern "C" fn _start() -> ! {
 
     println!(
         "
-@boot 
+@boot<;> Hello World! 
 
 
 New Boot, Works on x86_64 arch machines
@@ -68,8 +59,6 @@ TopRank Maverick Systems v0.00.01
 --------------------------------
 
 You have mail [+1]>
-
-Hello World!
         "
     );
 
@@ -92,8 +81,8 @@ Hello World!
 
     // calling our test entry point
     // annotating it to run in only test contexts
-    #[cfg(test)]
-    test_main();
+    // #[cfg(test)]
+    // test_main();
 
     loop {}
 }
@@ -106,27 +95,32 @@ fn panic(info: &PanicInfo) -> ! {
     loop {}
 }
 
-// A panic fn that prints to the host OS console using (UART)
-// Universal Async Receiver - Transmitter to communicate to it 
 #[cfg(test)]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
-    serial_println!("[failed]\n");
-    serial_println!("Error: {}\n", info);
-    exit_qemu(QemuExitCode::Failed);
-    loop {}
+    oubre_os::test_panic_handler(info)
 }
 
-#[cfg(test)]
-fn test_runner(tests: &[&dyn Testable]) {
-    serial_println!("Running {} tests", tests.len());
-    //[...]
-    // println!("Running {} tests", tests.len());
-    for test in tests {
-        test.run();
-    }
-    exit_qemu(QemuExitCode::Success);
-}
+
+// #[cfg(test)]
+// #[panic_handler]
+// fn panic(info: &PanicInfo) -> ! {
+//     serial_println!("[failed]\n");
+//     serial_println!("Error: {}\n", info);
+//     exit_qemu(QemuExitCode::Failed);
+//     loop {}
+// }
+
+// #[cfg(test)]
+// fn test_runner(tests: &[&dyn Testable]) {
+//     serial_println!("Running {} tests", tests.len());
+//     //[...]
+//     // println!("Running {} tests", tests.len());
+//     for test in tests {
+//         test.run();
+//     }
+//     exit_qemu(QemuExitCode::Success);
+// }
 
 #[test_case]
 fn trivial_assertion() {
@@ -139,22 +133,22 @@ fn trivial_assertion() {
     // loop {}
 }
 
-pub trait Testable {
-    fn run(&self) -> ();
-}
+// pub trait Testable {
+//     fn run(&self) -> ();
+// }
 
-// implement a Testable trait for an type that can be called like a function
-impl<T> Testable for T 
-where 
-    T: Fn(),
-{
-    fn run(&self) {
-        // prints a string slice of the name of the type / test function
-        serial_print!("{}...\t", core::any::type_name::<T>());
-        // runs the test function
-        self();
-        serial_println!("[ok]");
-    }
-}
+// // implement a Testable trait for an type that can be called like a function
+// impl<T> Testable for T 
+// where 
+//     T: Fn(),
+// {
+//     fn run(&self) {
+//         // prints a string slice of the name of the type / test function
+//         serial_print!("{}...\t", core::any::type_name::<T>());
+//         // runs the test function
+//         self();
+//         serial_println!("[ok]");
+//     }
+// }
 
 
