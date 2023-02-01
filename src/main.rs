@@ -149,7 +149,7 @@ where
     T: Fn(),
 {
     fn run(&self) {
-        // prints a string of the name of the test function
+        // prints a string slice of the name of the type / test function
         serial_print!("{}...\t", core::any::type_name::<T>());
         // runs the test function
         self();
