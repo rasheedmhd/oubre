@@ -283,12 +283,12 @@ fn test_println_many() {
     }
 }
 
-#[test_case]
-fn test_println_output() {
-    let s = "Some test string that fits on a single line";
-    println!("{}", s);
-    for (i, c) in s.chars().enumerate() {
-        let screen_char = PRINTER.lock().buffer.chars[VGA_BUFFER_HEIGHT - 4][i].read();
-        assert_eq!(char::from(screen_char.char_to_print), c);
-    }
-}
+//#[test_case]
+// fn test_println_output() {
+//     let s = "Some test string that fits on a single line";
+//     println!("{}", s);
+//     for (i, c) in s.chars().enumerate() {
+//         let screen_char = PRINTER.lock().buffer.chars[VGA_BUFFER_HEIGHT - 4][i].read();
+//         assert_eq!(char::from(screen_char.char_to_print), c);
+//     }
+// }

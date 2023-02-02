@@ -15,3 +15,4 @@ target = "x86_64-oubre_os.json"
 # applies to all targets whose "os" field is set to "none"
 [target.'cfg(target_os = "none")']
 runner = "bootimage runner"
+

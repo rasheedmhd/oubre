@@ -37,3 +37,10 @@ test-args = [
     ]
 test-success-exit-code = 33     # (0x10 << 1) | 1
 test-timeout = 300              # custom test timeout 
+
+# for integration test that have only one test funcs,
+# we can run them as executables by calling them 
+# in the entry point function - without needing the test runner
+[[test]]
+name = "should_panic"
+harness = false
