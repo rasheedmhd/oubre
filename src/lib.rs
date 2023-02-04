@@ -4,6 +4,9 @@
 #![test_runner(crate::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
+// the x86-interrupt calling convention is an unstable feature we need to mark it as such 
+#![feature(abi_x86_interrupt)]
+
 // rust has a test framework that it provides by default but the framework, it built into the std lib
 // depending on the test crate
 // since we are not linking the std lib, we need to spin up our own custom test framework
@@ -20,6 +23,7 @@
 
 pub mod vga_buffer;
 pub mod serial;
+pub mod interrupts;
 
 use core::panic::PanicInfo;
 
@@ -86,4 +90,8 @@ pub extern "C" fn _start() -> ! {
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     test_panic_handler(info)
+}
+
+pub fn init() {
+    interrupts::init_idt();
 }

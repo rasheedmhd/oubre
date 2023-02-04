@@ -79,10 +79,21 @@ You have mail [+1]>
     //     }
     // }
 
+    // calling out init function in lib.rs which in turn
+    // calls idt_init() in interrupts.rs to load the 
+    // InterruptDescriptorTable to the CPU 
+    oubre_os::init();
+
+    // invoking a breakpoint exception where the CPU will responds by
+    // running the breakpoint interrupt handler
+    x86_64::instructions::interrupts::int3();
+
     // calling our test entry point
     // annotating it to run in only test contexts
-    // #[cfg(test)]
-    // test_main();
+    #[cfg(test)]
+    test_main();
+
+    println!("It did not crash!");
 
     loop {}
 }
