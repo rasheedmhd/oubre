@@ -1,8 +1,11 @@
 // not linking the std lib
-#![no_std]
+//#![no_std]
 
 // Overwriting all Rust-level Entry Points
-#![no_main]
+//#![no_main]
+
+#![no_std]
+#![no_main] //#![cfg_attr(no_main)]
 #![feature(custom_test_frameworks)]
 #![test_runner(oubre_os::test_runner)]
 #![reexport_test_harness_main = "test_main"]
@@ -62,6 +65,8 @@ You have mail [+1]>
         "
     );
 
+
+
  //   println!("Hello World{}", "!");
 
     //panic!("{}", "Roses are red, error occurred at '{' ;)");
@@ -88,6 +93,18 @@ You have mail [+1]>
     // running the breakpoint interrupt handler
     x86_64::instructions::interrupts::int3();
 
+    // triggering a page fault
+    unsafe {
+        *(0xdeadbeef as *mut u64) = 42;
+    }
+    #[allow(unconditional_recursion)]
+    fn stack_overflow() {
+        stack_overflow(); // for each recursion the return address is pushed to the stack
+    }
+
+    // triggering a stack overflow
+    stack_overflow();
+
     // calling our test entry point
     // annotating it to run in only test contexts
     #[cfg(test)]
@@ -97,6 +114,7 @@ You have mail [+1]>
 
     loop {}
 }
+
 
 /// This function is called on panic.
 #[cfg(not(test))]

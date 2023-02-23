@@ -6,7 +6,7 @@ build-std = ["core", "compiler_builtins"]
 
 
 
-#controls built-time operations and compiler settings
+# controls built-time operations and compiler settings
 # overriding the build target
 # the target that we are compiling for
 [build]

@@ -6,6 +6,7 @@
         "repr",
         "screenchar",
         "UART",
+        "Virt",
         "Wörld"
     ]
 }

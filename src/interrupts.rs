@@ -1,6 +1,6 @@
 //static mut IDT: InterruptDescriptorTable = InterruptDescriptorTable::new();
 
-// the x86_64 crate has built-in abstractions that allow to create IDT that will map
+// the x86_64 crate has built-in abstractions that allow us to create IDT that will map
 // CPU exceptions to interrupt handlers
 use x86_64::structures::idt::{ InterruptDescriptorTable, InterruptStackFrame };
 use crate::println;
@@ -10,13 +10,25 @@ lazy_static! {
     static ref IDT: InterruptDescriptorTable = {
         // creating an IDT that we can add interrupt handlers to 
         let mut idt = InterruptDescriptorTable::new();
+        // setting the breakpoint handler
         idt.breakpoint.set_handler_fn(breakpoint_handler);
+        // setting a double fault handler
+        idt.double_fault.set_handler_fn(double_fault_handler);
         idt
     };
 }
 
 pub fn init_idt() {
     IDT.load();
+}
+
+// x86_64 arch does not allow returning from a double fault so 
+// the exception handler should diverge ( -> !)
+// the _error_code is always 0
+extern "x86-interrupt" fn double_fault_handler(
+    stack_frame: InterruptStackFrame, _error_code: u64) -> ! 
+{
+    panic!("EXCEPTION: DOUBLE FAULT \n {:#?}", stack_frame);
 }
 
 

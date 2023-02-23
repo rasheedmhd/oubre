@@ -24,6 +24,7 @@
 pub mod vga_buffer;
 pub mod serial;
 pub mod interrupts;
+pub mod gdt;
 
 use core::panic::PanicInfo;
 
@@ -61,8 +62,10 @@ where
     }
 }
 
+//#[cfg(test)]
 pub fn test_runner(tests: &[&dyn Testable]) {
-    serial_println!("Running {} tests", tests.len());
+    //serial_println!("Running {} tests", tests.len());
+    println!("Running {} tests", tests.len());
     for test in tests {
         test.run();
     }
@@ -76,7 +79,7 @@ pub fn test_panic_handler(info: &PanicInfo) -> ! {
     serial_println!("[Failed]\n");
     serial_println!("[Error: {}\n", info);
     exit_qemu(QemuExitCode::Failed);
-    loop {};
+    loop {}
 }
 
 #[cfg(test)]
@@ -90,9 +93,14 @@ pub extern "C" fn _start() -> ! {
 #[cfg(test)]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
-    test_panic_handler(info)
+    //test_panic_handler(info)
+    serial_println!("[Failed]\n");
+    serial_println!("[Error: {}\n", info);
+    exit_qemu(QemuExitCode::Failed);
+    loop {};
 }
 
 pub fn init() {
+    gdt::init();
     interrupts::init_idt();
 }
