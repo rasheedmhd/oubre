@@ -1,0 +1,59 @@
+0000000000204610 <_ZN8oubre_os10interrupts18breakpoint_handler17h8825d1a4bd931ab9E>:
+  204610: 41 53                        	pushq	%r11
+  204612: 41 52                        	pushq	%r10
+  204614: 41 51                        	pushq	%r9
+  204616: 41 50                        	pushq	%r8
+  204618: 57                           	pushq	%rdi
+  204619: 56                           	pushq	%rsi
+  20461a: 52                           	pushq	%rdx
+  20461b: 51                           	pushq	%rcx
+  20461c: 50                           	pushq	%rax
+  20461d: 48 81 ec a0 00 00 00         	subq	$160, %rsp
+  204624: fc                           	cld
+  204625: 48 8d bc 24 e8 00 00 00      	leaq	232(%rsp), %rdi
+  20462d: e8 8e fd ff ff               	callq	0x2043c0 <_ZN4core3fmt10ArgumentV19new_debug17h7a52ccb63adc2678E>
+  204632: 48 89 84 24 90 00 00 00      	movq	%rax, 144(%rsp)
+  20463a: 48 89 94 24 98 00 00 00      	movq	%rdx, 152(%rsp)
+  204642: 48 89 e0                     	movq	%rsp, %rax
+  204645: 48 c7 00 01 00 00 00         	movq	$1, (%rax)
+  20464c: 48 8d 35 05 62 01 00         	leaq	90629(%rip), %rsi       # 0x21a858 <z0k7t1wmg3qtmxe+0x21a858>
+  204653: 4c 8d 0d ee bd ff ff         	leaq	-16914(%rip), %r9       # 0x200448 <str.0+0x48>
+  20465a: 48 8d 7c 24 60               	leaq	96(%rsp), %rdi
+  20465f: 48 89 7c 24 08               	movq	%rdi, 8(%rsp)
+  204664: 48 8d 8c 24 90 00 00 00      	leaq	144(%rsp), %rcx
+  20466c: 41 b8 01 00 00 00            	movl	$1, %r8d
+  204672: 4c 89 44 24 10               	movq	%r8, 16(%rsp)
+  204677: 4c 89 c2                     	movq	%r8, %rdx
+  20467a: e8 61 fd ff ff               	callq	0x2043e0 <_ZN4core3fmt9Arguments16new_v1_formatted17hc681d7c0e3a276b1E>
+  20467f: 48 8b 7c 24 08               	movq	8(%rsp), %rdi
+  204684: e8 97 aa 00 00               	callq	0x20f120 <_ZN4core3fmt10ArgumentV111new_display17h75e733283a92b44fE>
+  204689: 4c 8b 44 24 10               	movq	16(%rsp), %r8
+  20468e: 48 89 44 24 50               	movq	%rax, 80(%rsp)
+  204693: 48 89 54 24 58               	movq	%rdx, 88(%rsp)
+  204698: 48 8d 35 99 61 01 00         	leaq	90521(%rip), %rsi       # 0x21a838 <z0k7t1wmg3qtmxe+0x21a838>
+  20469f: 48 8d 7c 24 20               	leaq	32(%rsp), %rdi
+  2046a4: 48 89 7c 24 18               	movq	%rdi, 24(%rsp)
+  2046a9: ba 02 00 00 00               	movl	$2, %edx
+  2046ae: 48 8d 4c 24 50               	leaq	80(%rsp), %rcx
+  2046b3: e8 88 fd ff ff               	callq	0x204440 <_ZN4core3fmt9Arguments6new_v117hffcb5365097c631aE>
+  2046b8: 48 8b 7c 24 18               	movq	24(%rsp), %rdi
+  2046bd: e8 4e 00 00 00               	callq	0x204710 <_ZN8oubre_os10vga_buffer6_print17hf44b414f09c1956bE>
+  2046c2: 48 81 c4 a0 00 00 00         	addq	$160, %rsp
+  2046c9: 58                           	popq	%rax
+  2046ca: 59                           	popq	%rcx
+  2046cb: 5a                           	popq	%rdx
+  2046cc: 5e                           	popq	%rsi
+  2046cd: 5f                           	popq	%rdi
+  2046ce: 41 58                        	popq	%r8
+  2046d0: 41 59                        	popq	%r9
+  2046d2: 41 5a                        	popq	%r10
+  2046d4: 41 5b                        	popq	%r11
+  2046d6: 48 cf                        	iretq
+  2046d8: cc                           	int3
+  2046d9: cc                           	int3
+  2046da: cc                           	int3
+  2046db: cc                           	int3
+  2046dc: cc                           	int3
+  2046dd: cc                           	int3
+  2046de: cc                           	int3
+  2046df: cc                           	int3
