@@ -44,3 +44,7 @@ test-timeout = 300              # custom test timeout
 [[test]]
 name = "should_panic"
 harness = false
+
+[[test]]
+name = "stack_overflow"
+harness = false 

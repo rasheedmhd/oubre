@@ -13,18 +13,27 @@
 
 use x86_64::VirtAddr;
 use x86_64::structures::tss::TaskStateSegment;
-use x86_64::structures::gdt::{ GlobalDescriptorTable, Descriptor };
+// use x86_64::structures::gdt::SegmentSelector;
+use x86_64::structures::gdt::{ SegmentSelector, GlobalDescriptorTable, Descriptor };
 use lazy_static::lazy_static;
 
 pub const DOUBLE_FAULT_IST_INDEX: u16 = 0;
 
 lazy_static! {
-    static ref GDT: GlobalDescriptorTable = {
+    static ref GDT: ( GlobalDescriptorTable, Selectors ) = {
         let mut gdt = GlobalDescriptorTable::new();
-        gdt.add_entry(Descriptor::kernel_code_segment());
-        gdt.add_entry(Descriptor::tss_segment(&TSS));
-        gdt
+        // the first segment of a gdt is an entry not used by the processor called the 
+        // null segment selector, Not adding it could cause the processor to crash 
+        // the x86_64 implements a null seg selec so we need not implement it ourselves 
+        let code_selector = gdt.add_entry(Descriptor::kernel_code_segment());
+        let tss_selector = gdt.add_entry(Descriptor::tss_segment(&TSS));
+        (gdt, Selectors { code_selector, tss_selector })
     };
+}
+
+struct Selectors {
+    code_selector: SegmentSelector,
+    tss_selector: SegmentSelector, 
 }
 
 lazy_static! {
@@ -43,5 +52,12 @@ lazy_static! {
 }
 
 pub fn init() {
-    GDT.load();
+    use x86_64::instructions::tables::load_tss;
+    use x86_64::instructions::segmentation::{CS, Segment};
+
+    GDT.0.load(); // loading the null segment selector 
+    unsafe {
+        CS::set_reg(GDT.1.code_selector);
+        load_tss(GDT.1.tss_selector);
+    }
 }
