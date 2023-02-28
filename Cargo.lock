@@ -35,9 +35,17 @@ version = "0.1.0"
 dependencies = [
  "bootloader",
  "lazy_static",
+ "pic8259",
  "spin",
  "uart_16550",
  "volatile 0.2.7",
+ "x86_64",
+]
+
+[[package]]
+name = "pic8259"
+version = "0.10.2"
+dependencies = [
  "x86_64",
 ]
 

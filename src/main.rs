@@ -91,19 +91,19 @@ You have mail [+1]>
 
     // invoking a breakpoint exception where the CPU will responds by
     // running the breakpoint interrupt handler
-    x86_64::instructions::interrupts::int3();
+    // x86_64::instructions::interrupts::int3();
 
     // triggering a page fault
-    unsafe {
-        *(0xdeadbeef as *mut u64) = 42;
-    }
-    #[allow(unconditional_recursion)]
-    fn stack_overflow() {
-        stack_overflow(); // for each recursion the return address is pushed to the stack
-    }
+    // unsafe {
+    //     *(0xdeadbeef as *mut u64) = 42;
+    // }
+    // #[allow(unconditional_recursion)]
+    // fn stack_overflow() {
+    //     stack_overflow(); // for each recursion the return address is pushed to the stack
+    // }
 
-    // triggering a stack overflow
-    stack_overflow();
+    // // triggering a stack overflow
+    // stack_overflow();
 
     // calling our test entry point
     // annotating it to run in only test contexts

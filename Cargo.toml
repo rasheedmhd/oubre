@@ -21,6 +21,19 @@ volatile = "0.2.6"
 spin = "0.5.2"
 x86_64 = "0.14.2"
 uart_16550 = "0.2.0"
+# Initially this project used phils implementation found here
+# https://docs.rs/pic8259/0.10.1/pic8259/index.html 
+# I identified some typos and made changes to it, creating a pull request
+# At the time of writing this, Phil hasn't accepted the request yet
+# I decided to use my local fork of this fork of his implementation
+# with my changes here. 
+# If you are trying to build this, you can find my forked version on github at
+# https://github.com/Virux/pic8259 
+# You can simply comment line 35 out like in line 34(just for demo) 
+# and uncomment line 36 to use Phil's code and it will compile just fine.
+# pic8259 = { version = "0.10.2", path = "../../contrib/pic8259" }
+pic8259 = { version = "0.10.2", path = "../../contrib/pic8259" }
+#pic8259 = "0.10.2"
 
 [dependencies.lazy_static]
 version = "1.0"
