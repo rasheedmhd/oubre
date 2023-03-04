@@ -1,17 +1,25 @@
+use core::fmt::{
+    Arguments,
+    Write,
+    Result,
+};
+
 use volatile::Volatile;
-use core::fmt;
 use lazy_static::lazy_static;
 use spin::Mutex;
 
+
+const VGA_BUFFER_ADDRESS: usize = 0xb8000;
+
 lazy_static! {
-    pub static ref PRINTER: Mutex<Screen> = {
+    pub static ref WRITER: Mutex<Screen> = {
         let mut screen = Screen {
             cursor_position: 0,
             blank_char: ScreenChar {
                 char_to_print: b' ',
                 color_code: ColorCode::new(Color::LightBlue, Color::LightBlue),
             },
-            buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
+            buffer: unsafe { &mut *(VGA_BUFFER_ADDRESS as *mut Buffer) },
         };
         screen.paint_background();
         Mutex::new(screen)
@@ -30,10 +38,16 @@ macro_rules! println {
 }
 
 #[doc(hidden)]
-pub fn _print(args: fmt::Arguments) {
-    use core::fmt::Write;
-    PRINTER.lock().write_fmt(args).unwrap();
-    PRINTER.lock().draw_border();
+pub fn _print(args: Arguments) {
+
+    WRITER.lock().draw_border();
+    WRITER.lock().write_fmt(args).unwrap();
+
+    // use x86_64::instructions::interrupts;
+
+    // interrupts::without_interrupts(|| {
+    //     WRITER.lock().write_fmt(args).unwrap();
+    // });
 }
 
 
@@ -108,16 +122,14 @@ const VGA_BUFFER_WIDTH: usize = 80;
 // Guarantees that Buffer is laid out in memory exactly like its one Field, chars
 #[repr(transparent)] 
 struct Buffer {
-    //chars: [[ScreenChar; VGA_BUFFER_WIDTH]; VGA_BUFFER_HEIGHT],
-    // wrapping ScreenChar with Volatile which uses read/write_volatile under the
-    // hood to prevent the compiler from optimizing the write to the buffer
-    // away since we are writing only once without reading.
+    // preventing compiler optimizing since we are writing only once without reading.
+    // https://docs.rs/volatile/latest/volatile/struct.Volatile.html
+    // https://en.wikipedia.org/wiki/Volatile_(computer_programming)
     chars: [[Volatile<ScreenChar>; VGA_BUFFER_WIDTH]; VGA_BUFFER_HEIGHT],
 }
 
 pub struct Screen {
     cursor_position: usize,
-    //color_code: ColorCode,
     blank_char: ScreenChar,
     buffer: &'static mut Buffer,
 }
@@ -186,11 +198,9 @@ impl Screen {
         match byte {
             // if the byte value is a '\n' we call new_line() 
             b'\n' => self.new_line(),
-            // if byte has a value we check if the current array line is full 
-            // with characters
+            // if byte has a value we check if the current array line is full with characters
             // if it is full we create a new line.
             byte => {
-
                 if self.cursor_position >= VGA_BUFFER_WIDTH {
                     self.new_line();
                 }
@@ -198,13 +208,8 @@ impl Screen {
                 let row = VGA_BUFFER_HEIGHT;
                 let col = self.cursor_position;
 
-                //let color_code = self.color_code;
-                self.buffer.chars[row - 4][col + 4 ].write(ScreenChar::new(byte));
-                // writing a new ScreenChar to the buffer
-                // self.buffer.chars[row][col].write(ScreenChar {
-                //     char_to_print: byte,
-                //     color_code,
-                // });
+
+                self.buffer.chars[row - 4][col + 4].write(ScreenChar::new(byte));
                 self.cursor_position += 1;
             }
         }
@@ -230,46 +235,18 @@ impl Screen {
     }
 
     fn new_line(&mut self) { 
-        for row in 1..VGA_BUFFER_HEIGHT {
-            for col in 0..VGA_BUFFER_WIDTH {
-                let character = self.buffer.chars[row][col].read();
-                self.buffer.chars[row - 1][col].write(character);
-            }
-        }
-        self.clear_row(VGA_BUFFER_HEIGHT - 1);
-        self.cursor_position = 0;
+
     }
 
-    fn clear_row(&mut self, row: usize) {
-        for col in 0..VGA_BUFFER_WIDTH {
-            self.buffer.chars[row][col].write(self.blank_char);
-        }
-    }
 }
 
-impl fmt::Write for Screen {
-    fn write_str(&mut self, s: &str) -> fmt::Result {
+impl Write for Screen {
+    fn write_str(&mut self, s: &str) -> Result {
         self.print_string(s);
         Ok(())
     }
 }
 
-//pub fn print_something() {
-//    use core::fmt::Write;
-//    let mut screen_printer = Screen {
-//        cursor_position: 0,
-//        //color_code: ColorCode::new(Color::LightGreen, Color::Black),
-//        // set the buffer to the VGA text buffer address as a mutable raw pointer
-//        // dereference it - meaning return the memory address pointed to by the raw pointer,
-//        // and borrow it mutably - so you can read/write to to.
-//        buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
-//    };
-//
-//    screen_printer.print_byte(b'S');
-//    screen_printer.print_string("alut! ");
-//    //writer.write_string(" Wörld!");
-//    write!(screen_printer, "The planets are {} and {}", 42, 1.0/3.0).unwrap();
-//}
 
 #[test_case]
 fn test_println_simple() {
@@ -288,8 +265,8 @@ fn test_println_output() {
     let s = "Some test string that fits on a single line";
     println!("{}", s);
     for (i, c) in s.chars().enumerate() {
-        let screen_char = PRINTER.lock().buffer.chars[VGA_BUFFER_HEIGHT - 8][i].read();
-        //assert_eq!(char::from(screen_char.char_to_print), c);
+        let screen_char = WRITER.lock().buffer.chars[VGA_BUFFER_HEIGHT - 5][i].read();
+        assert_eq!(char::from(screen_char.char_to_print), c);
         assert_eq!(1,1);
     }
 }

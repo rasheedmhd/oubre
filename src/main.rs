@@ -1,38 +1,12 @@
-// not linking the std lib
-//#![no_std]
-
-// Overwriting all Rust-level Entry Points
-//#![no_main]
-
 #![no_std]
-#![no_main] //#![cfg_attr(no_main)]
+#![no_main]
 #![feature(custom_test_frameworks)]
 #![test_runner(oubre_os::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
 use core::panic::PanicInfo;
-use oubre_os::println;
+use oubre_os::{ print, println };
 
-// mod vga_buffer;
-// mod serial;
-
-// the Success and Failed codes can  be any arbitrary numbers
-// as long as they aren't already used by QeMu
-// #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-// #[repr(u32)]
-// pub enum QemuExitCode {
-//     Success = 0x10,
-//     Failed = 0x11,
-// }
-
-// pub fn exit_qemu(exit_code: QemuExitCode) {
-//     use x86_64::instructions::port::Port;
-
-//     unsafe {
-//         let mut port = Port::new(0xf4);
-//         port.write(exit_code as u32);
-//     }
-// }
 // telling the compiler not to mangle the function name
 // mangling or decorating is a technique used in compiler
 // design to ensure that the compiler has unique names to
@@ -61,28 +35,12 @@ Password: *******
 TopRank Maverick Systems v0.00.01
 --------------------------------
 
+exit, the bootimage has a 5 mins time for it after which it will exit by force as failed. We can change that time in 
+
 You have mail [+1]>
         "
     );
 
-
-
- //   println!("Hello World{}", "!");
-
-    //panic!("{}", "Roses are red, error occurred at '{' ;)");
-
-    // use core::fmt::Write;
-    // vga_buffer::PRINTER.lock().write_str("Hello again").unwrap();
-    // write!(vga_buffer::PRINTER.lock(), ", some numbers: {} {}", 42, 222.1567).unwrap();
-
-    // let vga_buffer = 0xb8000 as *mut u8;
-
-    // for (i, &byte) in HELLO.iter().enumerate() {
-    //     unsafe {
-    //         *vga_buffer.offset(i as isize * 2) = byte;
-    //         *vga_buffer.offset(i as isize * 2 + 1) = 0xc;
-    //     }
-    // }
 
     // calling out init function in lib.rs which in turn
     // calls idt_init() in interrupts.rs to load the 
@@ -112,7 +70,9 @@ You have mail [+1]>
 
     println!("It did not crash!");
 
-    loop {}
+    loop {
+        print!("%%");
+    }
 }
 
 
@@ -131,26 +91,6 @@ fn panic(info: &PanicInfo) -> ! {
 }
 
 
-// #[cfg(test)]
-// #[panic_handler]
-// fn panic(info: &PanicInfo) -> ! {
-//     serial_println!("[failed]\n");
-//     serial_println!("Error: {}\n", info);
-//     exit_qemu(QemuExitCode::Failed);
-//     loop {}
-// }
-
-// #[cfg(test)]
-// fn test_runner(tests: &[&dyn Testable]) {
-//     serial_println!("Running {} tests", tests.len());
-//     //[...]
-//     // println!("Running {} tests", tests.len());
-//     for test in tests {
-//         test.run();
-//     }
-//     exit_qemu(QemuExitCode::Success);
-// }
-
 #[test_case]
 fn trivial_assertion() {
     // serial_print!("trivial assertion... ");
@@ -162,22 +102,6 @@ fn trivial_assertion() {
     // loop {}
 }
 
-// pub trait Testable {
-//     fn run(&self) -> ();
-// }
 
-// // implement a Testable trait for an type that can be called like a function
-// impl<T> Testable for T 
-// where 
-//     T: Fn(),
-// {
-//     fn run(&self) {
-//         // prints a string slice of the name of the type / test function
-//         serial_print!("{}...\t", core::any::type_name::<T>());
-//         // runs the test function
-//         self();
-//         serial_println!("[ok]");
-//     }
-// }
 
 
