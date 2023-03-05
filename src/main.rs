@@ -23,7 +23,7 @@ pub extern "C" fn _start() -> ! {
 
     println!(
         "
-@boot<;> Hello World! 
+@boot<;> Hello World!
 
 
 New Boot, Works on x86_64 arch machines
@@ -35,7 +35,7 @@ Password: *******
 TopRank Maverick Systems v0.00.01
 --------------------------------
 
-exit, the bootimage has a 5 mins time for it after which it will exit by force as failed. We can change that time in 
+exit, the bootimage has a 5 mins time for it after which it will exit by force as failed. We can change that time in
 
 You have mail [+1]>
         "
@@ -43,8 +43,8 @@ You have mail [+1]>
 
 
     // calling out init function in lib.rs which in turn
-    // calls idt_init() in interrupts.rs to load the 
-    // InterruptDescriptorTable to the CPU 
+    // calls idt_init() in interrupts.rs to load the
+    // InterruptDescriptorTable to the CPU
     oubre_os::init();
 
     // invoking a breakpoint exception where the CPU will responds by

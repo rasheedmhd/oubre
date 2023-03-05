@@ -8,8 +8,19 @@ use volatile::Volatile;
 use lazy_static::lazy_static;
 use spin::Mutex;
 
-
+// Defining the boundaries of the text buffer - 2d array 
+const VGA_BUFFER_HEIGHT: usize = 25;
+const VGA_BUFFER_WIDTH: usize = 80;
 const VGA_BUFFER_ADDRESS: usize = 0xb8000;
+
+enum Padding {
+    Top(usize),
+    Down(usize),
+    Right(usize),
+    Left(usize),  
+}
+
+
 
 lazy_static! {
     pub static ref WRITER: Mutex<Screen> = {
@@ -115,9 +126,7 @@ impl ScreenChar {
         }
     }
 }
-// Defining the boundaries of the text buffer - 2d array 
-const VGA_BUFFER_HEIGHT: usize = 25;
-const VGA_BUFFER_WIDTH: usize = 80;
+
 
 // Guarantees that Buffer is laid out in memory exactly like its one Field, chars
 #[repr(transparent)] 
@@ -161,32 +170,39 @@ impl Screen {
         //      draw 0xc8 in column 0
         //      draw 0xbc in VGA_BUFFER_WIDTH - 1
         for col in 1..VGA_BUFFER_WIDTH - 1 {
+            // print ═(0xcd) to the top right of the vga text buffer 
             self.buffer.chars[row][col].write(screenchar);
         }
         if row == 0 {
+            // print ╔(0xc9) to the top right of the vga text buffer 
             self.buffer.chars[row][0].write(self.border_line_char(0xc9));
+            // print ╗(0xbb) to the top right of the vga text buffer 
             self.buffer.chars[row][VGA_BUFFER_WIDTH - 1].write(self.border_line_char(0xbb));  
             return        
         }
         if row == VGA_BUFFER_HEIGHT - 1 {
+            // print ╚(0xc8) to the top right of the vga text buffer 
             self.buffer.chars[row][0].write(self.border_line_char(0xc8));
+            // print ╝(0xbc) to the top right of the vga text buffer 
             self.buffer.chars[row][VGA_BUFFER_WIDTH - 1].write(self.border_line_char(0xbc));
         }
     }
 
     fn draw_vertical_border(&mut self, screenchar: ScreenChar, row: usize) {
+        // print ║(0xba) to the top right of the vga text buffer 
         self.buffer.chars[row][0].write(screenchar);
+        // print ║(0xba) to the top right of the vga text buffer 
         self.buffer.chars[row][VGA_BUFFER_WIDTH - 1].write(screenchar);
     }
 
     pub fn draw_border(&mut self) {
 
-        let border_line = self.border_line_char(0xcd);
+        let horizontal_border_line = self.border_line_char(0xcd);
         let vertical_border_line = self.border_line_char(0xba);
 
         for row in 0..VGA_BUFFER_HEIGHT {
             if row == 0 || row == VGA_BUFFER_HEIGHT - 1 {
-                self.draw_horizontal_border(border_line, row);
+                self.draw_horizontal_border(horizontal_border_line, row);
                 continue;
             } 
             self.draw_vertical_border(vertical_border_line, row);
@@ -208,8 +224,7 @@ impl Screen {
                 let row = VGA_BUFFER_HEIGHT;
                 let col = self.cursor_position;
 
-
-                self.buffer.chars[row - 4][col + 4].write(ScreenChar::new(byte));
+                self.buffer.chars[row - 5][col + 5].write(ScreenChar::new(byte));
                 self.cursor_position += 1;
             }
         }
@@ -235,7 +250,14 @@ impl Screen {
     }
 
     fn new_line(&mut self) { 
-
+        for row in 2..VGA_BUFFER_HEIGHT - 4 {
+            for col in 5..VGA_BUFFER_WIDTH {
+                //let col = self.cursor_position;
+                let character = self.buffer.chars[row][col].read();
+                //self.cursor_position += 1;
+                self.buffer.chars[row - 1][col].write(character);               
+            }
+        }
     }
 
 }
