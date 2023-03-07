@@ -21,9 +21,8 @@ use oubre_os::{ print, println };
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
 
-    println!(
-        "
-@boot<;> Hello World!
+println!("
+@boot<;>
 
 
 New Boot, Works on x86_64 arch machines
@@ -31,15 +30,16 @@ New Boot, Works on x86_64 arch machines
 Display size: 80 * 25
 mem = 2222.1567
 # login root
+
 Password: *******
 TopRank Maverick Systems v0.00.01
+
 --------------------------------
 
 exit, the bootimage has a 5 mins time for it after which it will exit by force as failed. We can change that time in
 
 You have mail [+1]>
-        "
-    );
+");
 
 
     // calling out init function in lib.rs which in turn
@@ -68,10 +68,10 @@ You have mail [+1]>
     #[cfg(test)]
     test_main();
 
-    println!("It did not crash!");
+    //println!("It did not crash!");
 
     loop {
-        print!("%%");
+        //print!("%%");
     }
 }
 

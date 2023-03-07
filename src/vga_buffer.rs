@@ -8,19 +8,10 @@ use volatile::Volatile;
 use lazy_static::lazy_static;
 use spin::Mutex;
 
-// Defining the boundaries of the text buffer - 2d array 
+// Defining the boundaries of the text buffer - 2d array
 const VGA_BUFFER_HEIGHT: usize = 25;
 const VGA_BUFFER_WIDTH: usize = 80;
 const VGA_BUFFER_ADDRESS: usize = 0xb8000;
-
-enum Padding {
-    Top(usize),
-    Down(usize),
-    Right(usize),
-    Left(usize),  
-}
-
-
 
 lazy_static! {
     pub static ref WRITER: Mutex<Screen> = {
@@ -32,7 +23,7 @@ lazy_static! {
             },
             buffer: unsafe { &mut *(VGA_BUFFER_ADDRESS as *mut Buffer) },
         };
-        screen.paint_background();
+        //screen.paint_background();
         Mutex::new(screen)
     };
 }
@@ -51,7 +42,7 @@ macro_rules! println {
 #[doc(hidden)]
 pub fn _print(args: Arguments) {
 
-    WRITER.lock().draw_border();
+    //WRITER.lock().draw_border();
     WRITER.lock().write_fmt(args).unwrap();
 
     // use x86_64::instructions::interrupts;
@@ -63,11 +54,11 @@ pub fn _print(args: Arguments) {
 
 
 #[allow(dead_code)] // disabling compiler warnings for unused codes
-// like for structs, the compiler implements some Traits for enums, 
+// like for structs, the compiler implements some Traits for enums,
 // but we have to ask first using the #[derive()] attribute
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 // in memory rust stores C-style enums as integers the smallest integer value
-// that can accommodate the variant is used but we can tell rust the 
+// that can accommodate the variant is used but we can tell rust the
 // the integer value that we want it to use with #[repr()] attribute
 // here we tell rust to store our enum variants in memory as u8 integers
 #[repr(u8)]
@@ -101,7 +92,7 @@ struct ColorCode(u8);
 
 impl ColorCode {
     fn new(foreground: Color, background: Color) -> Self {
-        ColorCode((background as u8) << 4 | (foreground as u8)) 
+        ColorCode((background as u8) << 4 | (foreground as u8))
     }
 }
 
@@ -129,7 +120,7 @@ impl ScreenChar {
 
 
 // Guarantees that Buffer is laid out in memory exactly like its one Field, chars
-#[repr(transparent)] 
+#[repr(transparent)]
 struct Buffer {
     // preventing compiler optimizing since we are writing only once without reading.
     // https://docs.rs/volatile/latest/volatile/struct.Volatile.html
@@ -162,36 +153,36 @@ impl Screen {
     }
 
     fn draw_horizontal_border(&mut self, screenchar: ScreenChar, row: usize) {
-        // when row == 0, 
+        // when row == 0,
         //      draw 0xc9 in column 0
         //      draw 0xbb in column VGA_BUFFER_WIDTH - 1
-        // 
+        //
         // when row == VGA_BUFFER_HEIGHT - 1
         //      draw 0xc8 in column 0
         //      draw 0xbc in VGA_BUFFER_WIDTH - 1
         for col in 1..VGA_BUFFER_WIDTH - 1 {
-            // print ═(0xcd) to the top right of the vga text buffer 
+            // print ═(0xcd) to the top right of the vga text buffer
             self.buffer.chars[row][col].write(screenchar);
         }
         if row == 0 {
-            // print ╔(0xc9) to the top right of the vga text buffer 
+            // print ╔(0xc9) to the top right of the vga text buffer
             self.buffer.chars[row][0].write(self.border_line_char(0xc9));
-            // print ╗(0xbb) to the top right of the vga text buffer 
-            self.buffer.chars[row][VGA_BUFFER_WIDTH - 1].write(self.border_line_char(0xbb));  
-            return        
+            // print ╗(0xbb) to the top right of the vga text buffer
+            self.buffer.chars[row][VGA_BUFFER_WIDTH - 1].write(self.border_line_char(0xbb));
+            return
         }
         if row == VGA_BUFFER_HEIGHT - 1 {
-            // print ╚(0xc8) to the top right of the vga text buffer 
+            // print ╚(0xc8) to the top right of the vga text buffer
             self.buffer.chars[row][0].write(self.border_line_char(0xc8));
-            // print ╝(0xbc) to the top right of the vga text buffer 
+            // print ╝(0xbc) to the top right of the vga text buffer
             self.buffer.chars[row][VGA_BUFFER_WIDTH - 1].write(self.border_line_char(0xbc));
         }
     }
 
     fn draw_vertical_border(&mut self, screenchar: ScreenChar, row: usize) {
-        // print ║(0xba) to the top right of the vga text buffer 
+        // print ║(0xba) to the top right of the vga text buffer
         self.buffer.chars[row][0].write(screenchar);
-        // print ║(0xba) to the top right of the vga text buffer 
+        // print ║(0xba) to the top right of the vga text buffer
         self.buffer.chars[row][VGA_BUFFER_WIDTH - 1].write(screenchar);
     }
 
@@ -204,7 +195,7 @@ impl Screen {
             if row == 0 || row == VGA_BUFFER_HEIGHT - 1 {
                 self.draw_horizontal_border(horizontal_border_line, row);
                 continue;
-            } 
+            }
             self.draw_vertical_border(vertical_border_line, row);
         }
 
@@ -212,7 +203,7 @@ impl Screen {
 
     pub fn print_byte(&mut self, byte: u8) {
         match byte {
-            // if the byte value is a '\n' we call new_line() 
+            // if the byte value is a '\n' we call new_line()
             b'\n' => self.new_line(),
             // if byte has a value we check if the current array line is full with characters
             // if it is full we create a new line.
@@ -224,16 +215,17 @@ impl Screen {
                 let row = VGA_BUFFER_HEIGHT;
                 let col = self.cursor_position;
 
-                self.buffer.chars[row - 5][col + 5].write(ScreenChar::new(byte));
+                //self.buffer.chars[row - 5][col + 5].write(ScreenChar::new(byte));
+                self.buffer.chars[row - 1][col].write(ScreenChar::new(byte));
                 self.cursor_position += 1;
             }
         }
     }
-    
-    // to write strings we first convert it into bytes and write 
-    // byte by byte 
-    pub fn print_string(&mut self, s: &str) {
-        for byte in s.bytes() {
+
+    // to write strings we first convert it into bytes and write
+    // byte by byte
+    pub fn print_text(&mut self, text: &str) {
+        for byte in text.bytes() {
             match byte {
                 // printable ASCII byte or newline
                 // 0x20 = space (in hex)
@@ -249,22 +241,21 @@ impl Screen {
         }
     }
 
-    fn new_line(&mut self) { 
-        for row in 2..VGA_BUFFER_HEIGHT - 4 {
-            for col in 5..VGA_BUFFER_WIDTH {
-                //let col = self.cursor_position;
+    fn new_line(&mut self) {
+        for row in 1..VGA_BUFFER_HEIGHT {
+            for col in 0..VGA_BUFFER_WIDTH  {
                 let character = self.buffer.chars[row][col].read();
-                //self.cursor_position += 1;
-                self.buffer.chars[row - 1][col].write(character);               
+                self.buffer.chars[row - 1][col].write(character);
+                self.buffer.chars[row][col].write(self.blank_char);
             }
         }
+        self.cursor_position = 0;
     }
-
 }
 
 impl Write for Screen {
-    fn write_str(&mut self, s: &str) -> Result {
-        self.print_string(s);
+    fn write_str(&mut self, text: &str) -> Result {
+        self.print_text(text);
         Ok(())
     }
 }
