@@ -205,7 +205,7 @@ impl Screen {
         match byte {
             b'\n' => self.new_line(),
             byte => {
-                if self.cursor_position >= VGA_BUFFER_WIDTH {
+                if self.cursor_position >= VGA_BUFFER_WIDTH - 10 {
                     self.new_line();
                 }
 

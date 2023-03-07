@@ -22,23 +22,20 @@ use oubre_os::{ print, println };
 pub extern "C" fn _start() -> ! {
 
 println!("
-@boot<;>
+Hi, I am Oubre OS
 
-
-New Boot, Works on x86_64 arch machines
-: rl(0,0)rV0.00.01 Oubre OS
+Works on x86_64 arch machines
+version 0.0.1
 Display size: 80 * 25
-mem = 2222.1567
-# login root
 
-Password: *******
-TopRank Maverick Systems v0.00.01
-
+Copy Left @ Starlet Capital 
+version: v0.00.01
 --------------------------------
 
-exit, the bootimage has a 5 mins time for it after which it will exit by force as failed. We can change that time in
+creator: Rasheed Starlet Maverick 
 
-You have mail [+1]>
+If you are not failing a lot, you are probably not being as creative as you could be - you aren't stretching your imagination - John Backus, Creator of FORTRAN
+
 ");
 
 
