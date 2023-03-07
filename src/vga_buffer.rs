@@ -203,10 +203,7 @@ impl Screen {
 
     pub fn print_byte(&mut self, byte: u8) {
         match byte {
-            // if the byte value is a '\n' we call new_line()
             b'\n' => self.new_line(),
-            // if byte has a value we check if the current array line is full with characters
-            // if it is full we create a new line.
             byte => {
                 if self.cursor_position >= VGA_BUFFER_WIDTH {
                     self.new_line();
@@ -215,8 +212,7 @@ impl Screen {
                 let row = VGA_BUFFER_HEIGHT;
                 let col = self.cursor_position;
 
-                //self.buffer.chars[row - 5][col + 5].write(ScreenChar::new(byte));
-                self.buffer.chars[row - 1][col].write(ScreenChar::new(byte));
+                self.buffer.chars[row - 5][col + 5].write(ScreenChar::new(byte));
                 self.cursor_position += 1;
             }
         }
@@ -242,14 +238,7 @@ impl Screen {
     }
 
     fn new_line(&mut self) {
-        for row in 1..VGA_BUFFER_HEIGHT {
-            for col in 0..VGA_BUFFER_WIDTH  {
-                let character = self.buffer.chars[row][col].read();
-                self.buffer.chars[row - 1][col].write(character);
-                self.buffer.chars[row][col].write(self.blank_char);
-            }
-        }
-        self.cursor_position = 0;
+
     }
 }
 
