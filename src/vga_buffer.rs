@@ -238,7 +238,14 @@ impl Screen {
     }
 
     fn new_line(&mut self) {
-
+        for row in 2..VGA_BUFFER_HEIGHT - 4 {
+            for col in 5..VGA_BUFFER_WIDTH {
+                let byte = self.buffer.chars[row][col].read();
+                self.buffer.chars[row - 1][col].write(byte);
+                self.buffer.chars[row][col].write(self.blank_char)
+            }
+        }
+        self.cursor_position = 0;
     }
 }
 
