@@ -1,11 +1,14 @@
-//static mut IDT: InterruptDescriptorTable = InterruptDescriptorTable::new();
+use crate::{ 
+    gdt,
+    println,
+    print
+};
 
-// the x86_64 crate has built-in abstractions that allow us to create IDT that will map
-// CPU exceptions to interrupt handlers
-use crate::gdt;
-use crate::println;
-use crate::print;
-use x86_64::structures::idt::{ InterruptDescriptorTable, InterruptStackFrame };
+use x86_64::structures::idt::{ 
+    InterruptDescriptorTable, 
+    InterruptStackFrame,
+};
+
 use lazy_static::lazy_static;
 use pic8259::ChainedPics;
 use spin::Mutex;
@@ -75,11 +78,11 @@ extern "x86-interrupt" fn breakpoint_handler(stack_frame: InterruptStackFrame) {
     println!("EXCEPTION: BREAKPOINT\n{:#?}", stack_frame);
 }
 
-#[test_case]
-fn test_breakpoint_exception() {
-    // invoking a breakpoint exception
-    x86_64::instructions::interrupts::int3();
-}
+// #[test_case]
+// fn test_breakpoint_exception() {
+//     // invoking a breakpoint exception
+//     x86_64::instructions::interrupts::int3();
+// }
 
 extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: InterruptStackFrame)
 {

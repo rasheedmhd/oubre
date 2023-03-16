@@ -5,7 +5,10 @@
 #![reexport_test_harness_main = "test_main"]
 
 use core::panic::PanicInfo;
-use oubre_os::{ print, println };
+use oubre_os::{ 
+    print, 
+    println, 
+};
 
 // telling the compiler not to mangle the function name
 // mangling or decorating is a technique used in compiler
@@ -27,15 +30,15 @@ Hi, I am Oubre OS
 Works on x86_64 arch machines
 version 0.0.1
 Display size: 80 * 25
-
-Copy Left @ Starlet Capital 
 version: v0.00.01
---------------------------------
-
-creator: Rasheed Starlet Maverick 
+ 
 
 If you are not failing a lot, you are probably not being as creative as you could be - you aren't stretching your imagination - John Backus, Creator of FORTRAN
 
+
+----------------------------------
+Creator: Rasheed Starlet Maverick
+Copy Left @ www.starletcapital.com
 ");
 
 

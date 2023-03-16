@@ -16,10 +16,6 @@
 //     But this is ignored bc of #![no_main] 
 //     so we need to define an entry point
 //     which we can call in _start
-// #![feature(custom_test_frameworks)]
-// #![test_runner(crate::test_runner)]
-// //  test_runner entry point 
-// #![reexport_test_harness_main = "test_main"]
 
 pub mod vga_buffer;
 pub mod serial;
@@ -27,6 +23,7 @@ pub mod interrupts;
 pub mod gdt;
 
 use core::panic::PanicInfo;
+use x86_64::instructions::port::Port;
 
 // the Success and Failed codes can  be any arbitrary numbers
 // as long as they aren't already used by QeMu
@@ -38,12 +35,12 @@ pub enum QemuExitCode {
 }
 
 pub fn exit_qemu(exit_code: QemuExitCode) {
-    use x86_64::instructions::port::Port;
 
     unsafe {
         let mut port = Port::new(0xf4);
         port.write(exit_code as u32)
     }
+
 }
 
 
