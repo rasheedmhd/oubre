@@ -70,12 +70,12 @@ fn init_descriptor_tables() {
     //     *(0xdeadbeef as *mut u64) = 42;
     // }
     // #[allow(unconditional_recursion)]
-    fn stack_overflow() {
-        stack_overflow(); // for each recursion the return address is pushed to the stack
-    }
+    // fn stack_overflow() {
+    //     stack_overflow(); // for each recursion the return address is pushed to the stack
+    // }
 
-    // triggering a stack overflow
-    stack_overflow();
+    // // triggering a stack overflow
+    // stack_overflow();
 
     // calling our test entry point
     // annotating it to run in only test contexts

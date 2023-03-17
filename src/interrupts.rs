@@ -6,20 +6,20 @@ use crate::{
 
 use x86_64::structures::idt::{ 
     InterruptDescriptorTable, 
-    InterruptStackFrame,
+    InterruptStackFrame
 };
 
 use lazy_static::lazy_static;
 use pic8259::ChainedPics;
 use spin::Mutex;
 
-pub const PIC_1_OFFSET: u8 = 32;
-pub const PIC_2_OFFSET: u8 = PIC_1_OFFSET + 8;
+pub const PRIMARY_PIC_OFFSET: u8 = 32;
+pub const SECONDARY_PIC_OFFSET: u8 = PRIMARY_PIC_OFFSET + 8;
 
 #[derive(Debug, Clone, Copy)]
 #[repr(u8)]
 pub enum InterruptIndex {
-    Timer = PIC_1_OFFSET,
+    Timer = PRIMARY_PIC_OFFSET,
 }
 
 impl InterruptIndex {
@@ -36,7 +36,7 @@ impl InterruptIndex {
 
 pub static PICS:  Mutex<ChainedPics> = Mutex::new(
     unsafe {
-        ChainedPics::new(PIC_1_OFFSET, PIC_2_OFFSET)
+        ChainedPics::new(PRIMARY_PIC_OFFSET, SECONDARY_PIC_OFFSET)
     }
 );
 
