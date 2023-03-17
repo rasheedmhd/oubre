@@ -94,17 +94,3 @@ fn panic(info: &PanicInfo) -> ! {
     exit_qemu(QemuExitCode::Failed);
     loop {};
 }
-
-pub fn init() {
-    gdt::init();
-    interrupts::init_idt();
-    // unsafe {
-    //     interrupts::PICS.lock().initialize();
-
-    //     // executes the sti(set interrupt) instruction to enable external interrupts 
-    //     // enabling this enables the hardware timer (intel 8253) by default then we start getting
-    //     // timer interrupts which leads to a double fault 
-    //     // we need to handle the hardware timer interrupts 
-    //     x86_64::instructions::interrupts::enable();
-    // }
-}

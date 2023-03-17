@@ -8,6 +8,8 @@ use core::panic::PanicInfo;
 use oubre_os::{ 
     print, 
     println, 
+    gdt,
+    interrupts
 };
 
 // telling the compiler not to mangle the function name
@@ -41,11 +43,22 @@ Creator: Rasheed Starlet Maverick
 Copy Left @ www.starletcapital.com
 ");
 
+init_gdt();
 
-    // calling out init function in lib.rs which in turn
-    // calls idt_init() in interrupts.rs to load the
-    // InterruptDescriptorTable to the CPU
-    oubre_os::init();
+
+fn init_gdt() {
+    gdt::init();
+    interrupts::init_idt();
+    // unsafe {
+    //     interrupts::PICS.lock().initialize();
+
+    //     // executes the sti(set interrupt) instruction to enable external interrupts 
+    //     // enabling this enables the hardware timer (intel 8253) by default then we start getting
+    //     // timer interrupts which leads to a double fault 
+    //     // we need to handle the hardware timer interrupts 
+    //     x86_64::instructions::interrupts::enable();
+    // }
+}
 
     // invoking a breakpoint exception where the CPU will responds by
     // running the breakpoint interrupt handler
