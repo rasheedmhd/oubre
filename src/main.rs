@@ -18,7 +18,7 @@ use oubre_os::{
 // variable bindings, function names etc
 //https://en.wikipedia.org/wiki/Name_mangling
 
-//static HELLO: &[u8] = b"Hello World!, I am Oubre, an Operating System created by Starlet ;)";
+
 // extern "C" tells the compiler to use the C calling convention.
 // Calling conventions are a low level implementation of how functions
 // should receive parameters from calling functions and how to return the results.
@@ -43,10 +43,11 @@ Creator: Rasheed Starlet Maverick
 Copy Left @ www.starletcapital.com
 ");
 
-init_gdt();
+init_descriptor_tables();
 
 
-fn init_gdt() {
+
+fn init_descriptor_tables() {
     gdt::init();
     interrupts::init_idt();
     // unsafe {
@@ -69,12 +70,12 @@ fn init_gdt() {
     //     *(0xdeadbeef as *mut u64) = 42;
     // }
     // #[allow(unconditional_recursion)]
-    // fn stack_overflow() {
-    //     stack_overflow(); // for each recursion the return address is pushed to the stack
-    // }
+    fn stack_overflow() {
+        stack_overflow(); // for each recursion the return address is pushed to the stack
+    }
 
-    // // triggering a stack overflow
-    // stack_overflow();
+    // triggering a stack overflow
+    stack_overflow();
 
     // calling our test entry point
     // annotating it to run in only test contexts

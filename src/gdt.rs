@@ -41,7 +41,7 @@ lazy_static! {
         // null segment selector, not adding it could cause the processor to crash.
         // The x86_64 implements a null segment selector so we need not implement it ourselves
         let code_selector = gdt.add_entry(Descriptor::kernel_code_segment());
-        let tss_selector  = gdt.add_entry(Descriptor::tss_segment(&TSS));
+        let tss_selector = gdt.add_entry(Descriptor::tss_segment(&TSS));
         (gdt, Selectors { code_selector, tss_selector })
     };
 }
@@ -75,4 +75,5 @@ pub fn init() {
         CS::set_reg(GDT.1.code_selector);
         load_tss(GDT.1.tss_selector);
     }
+    
 }
