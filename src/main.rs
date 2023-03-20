@@ -12,6 +12,8 @@ use oubre_os::{
     interrupts
 };
 
+use x86_64::instructions::interrupts as hardware_interrupts;
+
 // telling the compiler not to mangle the function name
 // mangling or decorating is a technique used in compiler
 // design to ensure that the compiler has unique names to
@@ -44,21 +46,25 @@ Copy Left @ www.starletcapital.com
 ");
 
 init_descriptor_tables();
+init_PICs();
 
 
 
 fn init_descriptor_tables() {
     gdt::init();
     interrupts::init_idt();
-    // unsafe {
-    //     interrupts::PICS.lock().initialize();
+}
+
+fn init_PICs() {
+    unsafe {
+        interrupts::PICS.lock().initialize();
 
     //     // executes the sti(set interrupt) instruction to enable external interrupts 
     //     // enabling this enables the hardware timer (intel 8253) by default then we start getting
     //     // timer interrupts which leads to a double fault 
     //     // we need to handle the hardware timer interrupts 
-    //     x86_64::instructions::interrupts::enable();
-    // }
+        hardware_interrupts::enable();
+    }
 }
 
     // invoking a breakpoint exception where the CPU will responds by
