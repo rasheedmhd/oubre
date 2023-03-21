@@ -8,6 +8,8 @@ use volatile::Volatile;
 use lazy_static::lazy_static;
 use spin::Mutex;
 
+use x86_64::instructions::interrupts;
+
 // Defining the boundaries of the text buffer - 2d array
 const VGA_BUFFER_HEIGHT: usize = 25;
 const VGA_BUFFER_WIDTH: usize = 80;
@@ -45,11 +47,9 @@ pub fn _print(args: Arguments) {
     WRITER.lock().draw_border();
     WRITER.lock().write_fmt(args).unwrap();
 
-    // use x86_64::instructions::interrupts;
-
-    // interrupts::without_interrupts(|| {
-    //     WRITER.lock().write_fmt(args).unwrap();
-    // });
+    interrupts::without_interrupts(|| {
+        WRITER.lock().write_fmt(args).unwrap();
+    });
 }
 
 
@@ -262,20 +262,33 @@ fn test_println_simple() {
     println!("test_println_simple output");
 }
 
+#[test_case]
+fn test_println_many() {
+    for _ in 0..200 {
+        println!("test_println_many output");
+    }
+}
+
 // #[test_case]
-// fn test_println_many() {
-//     for _ in 0..200 {
-//         println!("test_println_many output");
+// fn test_println_output() {
+//     let test_text = "Some test string that fits on a single line";
+//     println!("{}", test_text);
+//     for (i, c) in test_text.chars().enumerate() {
+//         let screen_char = WRITER.lock().buffer.chars[VGA_BUFFER_HEIGHT - 5][i].read();
+//         assert_eq!(char::from(screen_char.char_to_print), c);
+//         assert_eq!(1,1);
 //     }
 // }
 
 #[test_case]
 fn test_println_output() {
-    let test_text = "Some test string that fits on a single line";
-    println!("{}", test_text);
-    // for (i, c) in test_text.chars().enumerate() {
-    //     let screen_char = WRITER.lock().buffer.chars[VGA_BUFFER_HEIGHT - 5][i].read();
-    //     assert_eq!(char::from(screen_char.char_to_print), c);
-    //     assert_eq!(1,1);
-    // }
+    let test_string = "Some test string that fits on a single line";
+    interrupts::without_interrupts(|| {
+        let mut writer = WRITER.lock();
+        writeln!(writer, "\n{}", test_string).expect("writeln failed");
+        for (i, c) in test_string.chars().enumerate() {
+            let screen_char = writer.buffer.chars[VGA_BUFFER_HEIGHT - 5][i].read();
+            assert_eq!(char::from(screen_char.char_to_print), c);
+        }
+    });
 }

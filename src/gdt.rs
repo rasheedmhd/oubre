@@ -32,7 +32,7 @@ use x86_64::{
 
 use lazy_static::lazy_static;
 
-pub const DOUBLE_FAULT_IST_INDEX: u16 = 0;
+pub const DOUBLE_FAULT_IST_INDEX: u16 = 4;
 
 lazy_static! {
     static ref GDT: ( GlobalDescriptorTable, Selectors ) = {
