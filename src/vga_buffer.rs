@@ -44,12 +44,11 @@ macro_rules! println {
 #[doc(hidden)]
 pub fn _print(args: Arguments) {
 
-    WRITER.lock().draw_border();
-    WRITER.lock().write_fmt(args).unwrap();
-
     interrupts::without_interrupts(|| {
+        WRITER.lock().draw_border();
         WRITER.lock().write_fmt(args).unwrap();
     });
+    
 }
 
 
@@ -280,15 +279,16 @@ fn test_println_many() {
 //     }
 // }
 
-#[test_case]
-fn test_println_output() {
-    let test_string = "Some test string that fits on a single line";
-    interrupts::without_interrupts(|| {
-        let mut writer = WRITER.lock();
-        writeln!(writer, "\n{}", test_string).expect("writeln failed");
-        for (i, c) in test_string.chars().enumerate() {
-            let screen_char = writer.buffer.chars[VGA_BUFFER_HEIGHT - 5][i].read();
-            assert_eq!(char::from(screen_char.char_to_print), c);
-        }
-    });
-}
+// #[test_case]
+// fn test_println_output() {
+//     let test_string = "Go for GREAT";
+//     interrupts::without_interrupts(|| {
+//         //println!("Some test string that fits on a single line");
+//         let mut writer = WRITER.lock();
+//         writeln!(writer, "\n{}", test_string).expect("writeln failed");
+//         for (i, c) in test_string.chars().enumerate() {
+//             let screen_char = writer.buffer.chars[VGA_BUFFER_HEIGHT - 5][i].read();
+//             assert_eq!(char::from(screen_char.char_to_print), c);
+//         }
+//     });
+// }

@@ -42,6 +42,7 @@ If you are not failing a lot, you are probably not being as creative as you coul
 Creator: Rasheed Starlet Maverick
 Copy Left @ www.starletcapital.com
 ");
+println!("Some test string that fits on a single line");
 
     init_descriptor_tables();
     init_PICs();
