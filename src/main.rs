@@ -85,12 +85,7 @@ println!("Some test string that fits on a single line");
     #[cfg(test)]
     test_main();
 
-    //println!("It did not crash!");
-
-    loop {
-        for _ in 0..10_000 {}
-        print!("-");
-    }
+    oubre_os::hlt_loop();
 }
 
 /// This function is called on panic.
@@ -98,7 +93,7 @@ println!("Some test string that fits on a single line");
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     println!("{}", info);
-    loop {}
+    oubre_os::hlt_loop();
 }
 
 #[cfg(test)]
