@@ -24,7 +24,6 @@ use pic8259::ChainedPics;
 use spin::Mutex;
 
 pub const PRIMARY_PIC_OFFSET: u8 = 32;
-pub const SECONDARY_PIC_OFFSET: u8 = PRIMARY_PIC_OFFSET + 8;
 
 #[derive(Debug, Clone, Copy)]
 #[repr(u8)]
@@ -47,7 +46,7 @@ impl InterruptIndex {
 
 pub static PICS:  Mutex<ChainedPics> = Mutex::new(
     unsafe {
-        ChainedPics::new(PRIMARY_PIC_OFFSET, SECONDARY_PIC_OFFSET)
+        ChainedPics::new_contiguous(PRIMARY_PIC_OFFSET)
     }
 );
 
@@ -106,6 +105,7 @@ extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: InterruptStackFr
     }
 }
 
+static mut caps_lock_state: bool = false;
 
 extern "x86-interrupt" fn keyboard_interrupt_handler(stack_frame: InterruptStackFrame) 
 {
@@ -114,7 +114,7 @@ extern "x86-interrupt" fn keyboard_interrupt_handler(stack_frame: InterruptStack
     //     static ref KEYBOARD: Mutex<Keyboard<layouts::Us104Key, ScancodeSet1>> = 
     //         Mutex::new(
     //             Keyboard::new(layouts::Us104Key, ScancodeSet1, HandleControl::Ignore)
-    //         )
+    //         );
     // }
 
     lazy_static! {
@@ -124,21 +124,52 @@ extern "x86-interrupt" fn keyboard_interrupt_handler(stack_frame: InterruptStack
         };
     }
 
-    let mut keyboard = KEYBOARD.lock();
-    let mut port = Port::new(0x60);
-
-    let scancode: u8 = unsafe { port.read() };
-    if let Ok(Some(key_event)) = keyboard.add_byte(scancode) {
-        if let Some(key) = keyboard.process_keyevent(key_event) {
-            match key {
-                DecodedKey::Unicode(character) => print!("{}", character),
-                DecodedKey::RawKey(key) => print!("{:?}", key),
-            }
-        }
-    }
-
     unsafe {
         PICS.lock()
         .notify_end_of_interrupt(InterruptIndex::Keyboard.as_u8());
+
+        let mut keyboard = KEYBOARD.lock();
+        let mut port = Port::new(0x60);
+    
+        let scancode: u8 = port.read();
+    
+        let key = match scancode  {
+    
+            0x1C => Some("\n"),
+            0x09 => Some("8"),
+            0x1E => Some("A"),
+            0x3A => {
+                caps_lock_state = !caps_lock_state;
+                None
+            },
+    
+            _ => None
+        };
+    
+        if caps_lock_state {
+            if let Some(scancode) = key {
+                print!("{}U", scancode);
+            };
+        } else {
+            if let Some(scancode) = key {
+                print!("{}u", scancode);
+            }; 
+        }
+        // if let Some(scancode) = key {
+        //     print!("{}", scancode);
+        // }; 
+        
+    
+    
+        //print!("{scancode}");
+        // if let Ok(Some(key_event)) = keyboard.add_byte(scancode) {
+        //     if let Some(key) = keyboard.process_keyevent(key_event) {
+        //         match key {
+        //             DecodedKey::Unicode(character) => print!("{}", character),
+        //             DecodedKey::RawKey(key) => print!("{:?}", key),
+        //         }
+        //     }
+        // }
     }
+
 }

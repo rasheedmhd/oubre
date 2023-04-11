@@ -95,5 +95,5 @@ fn panic(info: &PanicInfo) -> ! {
 }
 
 pub fn hlt_loop() -> ! {
-    loop { x86_64::instructions::hlt; }
+    loop { x86_64::instructions::hlt(); }
 }

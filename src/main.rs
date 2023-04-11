@@ -86,6 +86,7 @@ println!("Some test string that fits on a single line");
     test_main();
 
     oubre_os::hlt_loop();
+    
 }
 
 /// This function is called on panic.
