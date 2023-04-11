@@ -81,8 +81,6 @@ extern "x86-interrupt" fn double_fault_handler(
     panic!("EXCEPTION: DOUBLE FAULT \n {:#?}", stack_frame);
 }
 
-
-
 // a breakpoint interrupt handler that use the x86-interrupt calling convention
 // that simply prints text and the stack frame
 extern "x86-interrupt" fn breakpoint_handler(stack_frame: InterruptStackFrame) {

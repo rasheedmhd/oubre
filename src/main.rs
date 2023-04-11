@@ -14,16 +14,9 @@ use oubre_os::{
 
 use x86_64::instructions::interrupts as hardware_interrupts;
 
-// telling the compiler not to mangle the function name
-// mangling or decorating is a technique used in compiler
-// design to ensure that the compiler has unique names to
-// variable bindings, function names etc
-//https://en.wikipedia.org/wiki/Name_mangling
-
 // extern "C" tells the compiler to use the C calling convention.
-// Calling conventions are a low level implementation of how functions
-// should receive parameters from calling functions and how to return the results.
 // https://en.wikipedia.org/wiki/Calling_convention
+// https://www.rasheedstarlet.com/articles/calling.html
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
     println!("
@@ -64,24 +57,6 @@ println!("Some test string that fits on a single line");
         }
     }
 
-    // invoking a breakpoint exception where the CPU will responds by
-    // running the breakpoint interrupt handler
-    // x86_64::instructions::interrupts::int3();
-
-    // triggering a page fault
-    // unsafe {
-    //     *(0xdeadbeef as *mut u64) = 42;
-    // }
-    // #[allow(unconditional_recursion)]
-    // fn stack_overflow() {
-    //     stack_overflow(); // for each recursion the return address is pushed to the stack
-    // }
-
-    // // triggering a stack overflow
-    // stack_overflow();
-
-    // calling our test entry point
-    // annotating it to run in only test contexts
     #[cfg(test)]
     test_main();
 
@@ -108,8 +83,4 @@ fn trivial_assertion() {
     oubre_os::serial_print!("trivial assertion... ");
     assert_eq!(1, 1);
     oubre_os::serial_println!("[ok]");
-
-    // when a test runs and encounters a problem where the test is not able to
-    // exit, the bootimage has a 5 mins time for it after which it will exit by force as failed. We can change that time in Cargo.toml
-    // loop {}
 }
