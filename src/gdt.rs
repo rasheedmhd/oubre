@@ -37,9 +37,6 @@ pub const DOUBLE_FAULT_IST_INDEX: u16 = 4;
 lazy_static! {
     static ref GDT: ( GlobalDescriptorTable, Selectors ) = {
         let mut gdt = GlobalDescriptorTable::new();
-        // The first segment of a gdt is an entry not used by the processor called the
-        // null segment selector, not adding it could cause the processor to crash.
-        // The x86_64 implements a null segment selector so we need not implement it ourselves
         let code_selector = gdt.add_entry(Descriptor::kernel_code_segment());
         let tss_selector = gdt.add_entry(Descriptor::tss_segment(&TSS));
         (gdt, Selectors { code_selector, tss_selector })

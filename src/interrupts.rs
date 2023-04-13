@@ -6,8 +6,11 @@ use crate::{
 
 use x86_64::structures::idt::{ 
     InterruptDescriptorTable, 
-    InterruptStackFrame
+    InterruptStackFrame,
+    PageFaultErrorCode
 };
+
+use x86_64::registers::control::Cr2;
 //------------------------------------ keyboard_interrupt_handler imports
 use x86_64::instructions::port::Port; 
 use pc_keyboard::{
@@ -52,11 +55,13 @@ pub static PICS:  Mutex<ChainedPics> = Mutex::new(
 
 lazy_static! {
     static ref IDT: InterruptDescriptorTable = {
-        // creating an IDT that we can add interrupt handlers to
+
         let mut idt = InterruptDescriptorTable::new();
-        // setting the breakpoint handler
         idt.breakpoint.set_handler_fn(breakpoint_handler);
-        // setting a double fault handler
+
+        // MEMORY MANAGEMENT
+        idt.page_fault.set_handler_fn(page_fault_handler);
+
         unsafe {
             idt.double_fault.set_handler_fn(double_fault_handler)
             .set_stack_index(gdt::DOUBLE_FAULT_IST_INDEX);
@@ -65,6 +70,7 @@ lazy_static! {
         idt[InterruptIndex::Timer.as_usize()].set_handler_fn(timer_interrupt_handler);
         idt[InterruptIndex::Keyboard.as_usize()].set_handler_fn(keyboard_interrupt_handler);
         idt
+
     };
 }
 
@@ -85,6 +91,7 @@ extern "x86-interrupt" fn double_fault_handler(
 // that simply prints text and the stack frame
 extern "x86-interrupt" fn breakpoint_handler(stack_frame: InterruptStackFrame) {
     println!("EXCEPTION: BREAKPOINT\n{:#?}", stack_frame);
+    //oubre_os::hlt_loop();
 }
 
 // #[test_case]
@@ -92,6 +99,18 @@ extern "x86-interrupt" fn breakpoint_handler(stack_frame: InterruptStackFrame) {
 //     // invoking a breakpoint exception
 //     x86_64::instructions::interrupts::int3();
 // }
+
+extern "x86-interrupt" fn page_fault_handler(
+    stack_frame: InterruptStackFrame, 
+    error_code: PageFaultErrorCode
+) 
+{
+    println!("EXCEPTION: PAGE FAULT");
+    println!("Accessed Address: {:#?}", Cr2::read());
+    println!("Error Code: {:?}", error_code);
+    println!("Stack frame:\n{:#?}", stack_frame);
+    crate::hlt_loop();
+}
 
 extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: InterruptStackFrame)
 {

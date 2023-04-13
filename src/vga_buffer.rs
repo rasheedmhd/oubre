@@ -52,14 +52,9 @@ pub fn _print(args: Arguments) {
 }
 
 
-#[allow(dead_code)] // disabling compiler warnings for unused codes
-// like for structs, the compiler implements some Traits for enums,
-// but we have to ask first using the #[derive()] attribute
+#[allow(dead_code)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-// in memory rust stores C-style enums as integers the smallest integer value
-// that can accommodate the variant is used but we can tell rust the
-// the integer value that we want it to use with #[repr()] attribute
-// here we tell rust to store our enum variants in memory as u8 integers
+
 #[repr(u8)]
 pub enum Color {
     Black = 0x0,

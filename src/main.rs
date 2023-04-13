@@ -12,6 +12,7 @@ use oubre_os::{
         println
     };
 
+use x86_64::registers::control::Cr3;
 use x86_64::instructions::interrupts as hardware_interrupts;
 
 // extern "C" tells the compiler to use the C calling convention.
@@ -20,43 +21,54 @@ use x86_64::instructions::interrupts as hardware_interrupts;
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
     println!("
-Hi, I am Oubre OS
-
-Works on x86_64 arch machines
-version 0.0.1
-Display size: 80 * 25
-version: v0.00.01
-
-
-If you are not failing a lot, you are probably not being as creative as you could be - you aren't stretching your imagination - John Backus, Creator of FORTRAN
-
-
-----------------------------------
-Creator: Rasheed Starlet Maverick
-Copy Left @ www.starletcapital.com
-");
-println!("Some test string that fits on a single line");
-
+    Hi, I am Oubre OS
+    
+    Works on x86_64 arch machines
+    version 0.0.1
+    Display size: 80 * 25
+    version: v0.00.01
+    
+    
+    If you are not failing a lot, you are probably not being as creative as you could be - you aren't stretching your imagination - John Backus, Creator of FORTRAN
+    
+    
+    ----------------------------------
+    Creator: Rasheed Starlet Maverick
+    Copy Left @ www.starletcapital.com
+    ");
+    
     init_descriptor_tables();
     init_PICs();
-
+    
     fn init_descriptor_tables() {
         gdt::init();
         interrupts::init_idt();
     }
 
+    unsafe {   
+
+        // read 
+        let x = *(0x2049c4 as *mut &'static str);
+        println!("read worked");
+
+        // write -> Triggers Page Fault
+        // *(0x2049c4 as *mut &'static str) = "Break Me, Mdf";
+        // println!("write worked");
+    }
+
+    let (level_4_page_table, _) = Cr3::read();
+    println!("Level 4 Page Table: {:?}", level_4_page_table.start_address());
+    
     fn init_PICs() {
         unsafe {
             interrupts::PICS.lock().initialize();
-
             // executes the sti(set interrupt) instruction to enable external interrupts
-            // enabling this enables the hardware timer (intel 8253) by default then we start getting
-            // timer interrupts which leads to a double fault
-            // we need to handle the hardware timer interrupts
             hardware_interrupts::enable();
+
+            
         }
     }
-
+    
     #[cfg(test)]
     test_main();
 
@@ -64,7 +76,7 @@ println!("Some test string that fits on a single line");
     
 }
 
-/// This function is called on panic.
+
 #[cfg(not(test))]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
