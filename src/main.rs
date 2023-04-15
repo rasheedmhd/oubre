@@ -51,9 +51,9 @@ pub extern "C" fn _start() -> ! {
         let x = *(0x2049c4 as *mut &'static str);
         println!("read worked");
 
-        // write -> Triggers Page Fault
-        // *(0x2049c4 as *mut &'static str) = "Break Me, Mdf";
-        // println!("write worked");
+        //write -> Triggers Page Fault
+        *(0x2049c4 as *mut &'static str) = "Break Me, Mdf";
+        println!("write worked");
     }
 
     let (level_4_page_table, _) = Cr3::read();

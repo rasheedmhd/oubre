@@ -8,7 +8,7 @@ use volatile::Volatile;
 use lazy_static::lazy_static;
 use spin::Mutex;
 
-use x86_64::instructions::interrupts::{self, are_enabled};
+use x86_64::instructions::interrupts;
 
 // Defining the boundaries of the text buffer - 2d array
 const VGA_BUFFER_HEIGHT: usize = 25;
@@ -29,6 +29,7 @@ lazy_static! {
         Mutex::new(screen)
     };
 }
+
 
 #[macro_export]
 macro_rules! print {

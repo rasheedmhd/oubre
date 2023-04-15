@@ -105,10 +105,19 @@ extern "x86-interrupt" fn page_fault_handler(
     error_code: PageFaultErrorCode
 ) 
 {
-    println!("EXCEPTION: PAGE FAULT");
-    println!("Accessed Address: {:#?}", Cr2::read());
-    println!("Error Code: {:?}", error_code);
-    println!("Stack frame:\n{:#?}", stack_frame);
+    println!("**********************************************************");
+    print!("a PAGE FAULT EXCEPTION occurred at ");
+    println!("{:?}", Cr2::read());
+    println!("Error Code: {:?}\n", error_code);
+    println!("**********************************************************");
+    println!("Stack Frame:");
+    println!("Instruction Pointer: {:?}", stack_frame.instruction_pointer);
+    println!("Stack Pointer: {:?}", stack_frame.stack_pointer);
+    println!("CPU Flags: {:?}", stack_frame.cpu_flags);
+    println!("Selector Descriptors");
+    println!("Code Segment: {:?}", stack_frame.code_segment);
+    println!("Stack Segment: {:?}", stack_frame.stack_segment);
+    println!("**********************************************************");
     crate::hlt_loop();
 }
 
