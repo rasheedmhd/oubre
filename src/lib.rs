@@ -7,8 +7,8 @@
 // the x86-interrupt calling convention is an unstable feature we need to mark it as such 
 #![feature(abi_x86_interrupt)]
 
-// rust has a test framework that it provides by default but the framework, it built into the std lib
-// depending on the test crate
+// rust has a test framework that it provides by default but it is built into the std lib
+// and depends on the test crate
 // since we are not linking the std lib, we need to spin up our own custom test framework
 
 // THE CUSTOM TEST FRAMEWORKS
@@ -24,6 +24,14 @@ pub mod gdt;
 
 use core::panic::PanicInfo;
 use x86_64::instructions::port::Port;
+
+use bootloader::{
+    BootInfo,
+    entry_point
+};
+
+#[cfg(test)]
+entry_point!(test_kernel_main);
 
 // the Success and Failed codes can  be any arbitrary numbers
 // as long as they aren't already used by QeMu
@@ -79,8 +87,7 @@ pub fn test_panic_handler(info: &PanicInfo) -> ! {
 }
 
 #[cfg(test)]
-#[no_mangle]
-pub extern "C" fn _start() -> ! {
+fn test_kernel_main(boot_info: &'static BootInfo) -> ! {
     test_main();
     hlt_loop();
 }

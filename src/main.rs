@@ -12,14 +12,17 @@ use oubre_os::{
         println
     };
 
+use bootloader::{
+        BootInfo,
+        entry_point
+    };
+    
 use x86_64::registers::control::Cr3;
 use x86_64::instructions::interrupts as hardware_interrupts;
 
-// extern "C" tells the compiler to use the C calling convention.
-// https://en.wikipedia.org/wiki/Calling_convention
-// https://www.rasheedstarlet.com/articles/calling.html
-#[no_mangle]
-pub extern "C" fn _start() -> ! {
+entry_point!(kernel_main);
+
+fn kernel_main(boot_info: &'static BootInfo) -> ! {
     println!("
     Hi, I am Oubre OS
     
