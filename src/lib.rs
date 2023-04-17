@@ -21,6 +21,7 @@ pub mod vga_buffer;
 pub mod serial;
 pub mod interrupts;
 pub mod gdt;
+pub mod memory;
 
 use core::panic::PanicInfo;
 use x86_64::instructions::port::Port;
