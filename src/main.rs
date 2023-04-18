@@ -67,6 +67,7 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
         // virtual address mapped to physical address 0
         boot_info.physical_memory_offset,
     ];
+    
     for &address in &addresses {
         let virt_addr = VirtAddr::new(address);
         // let phys_addr = unsafe { 
