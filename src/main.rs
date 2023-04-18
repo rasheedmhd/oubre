@@ -3,16 +3,14 @@
 #![feature(custom_test_frameworks)]
 #![test_runner(oubre_os::test_runner)]
 #![reexport_test_harness_main = "test_main"]
+#![allow(non_snake_case)]
 
 use core::panic::PanicInfo;
 use oubre_os::{
-        memory::{
-            active_level_4_table,
-            translate_addr,
-        },
+        memory,
         gdt, 
         interrupts, 
-        print, 
+        //print, 
         println,
     };
 
@@ -23,9 +21,12 @@ use bootloader::{
 
 use x86_64::{
     instructions::interrupts as hardware_interrupts,
-    registers::control::Cr3,
+    //registers::control::Cr3,
     VirtAddr,
-    structures::paging::PageTable,
+    structures::paging::{
+        //PageTable,
+        Translate,
+    },
 };
 
 
@@ -52,6 +53,10 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
 
     let phys_mem_offset = VirtAddr::new(boot_info.physical_memory_offset);
 
+    let mapper = unsafe {
+        memory::init(phys_mem_offset)
+    };
+
     let addresses = [
         // the identity-mapped vga buffer page
         0xb8000,
@@ -64,33 +69,34 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     ];
     for &address in &addresses {
         let virt_addr = VirtAddr::new(address);
-        let phys_addr = unsafe { 
-            translate_addr(virt_addr, phys_mem_offset) 
-        };
+        // let phys_addr = unsafe { 
+        //     translate_addr(virt_addr, phys_mem_offset) 
+        // };
+        let phys_addr = mapper.translate_addr(virt_addr);
         println!("{:?} -> {:?}", virt_addr, phys_addr);
     }
-    
-    let l4_table = unsafe { 
-        active_level_4_table(phys_mem_offset) 
-    };
 
-    for (i, entry) in l4_table.iter().enumerate() {
-        if !entry.is_unused() {
-            println!("L4 entry {}: {:?}", i, entry);
+    // let l4_table = unsafe { 
+    //     active_level_4_table(phys_mem_offset) 
+    // };
 
-            // retrieve physical address from entry and convert it
-            let phys_addr = entry.frame().unwrap().start_address();
-            let virt_addr = phys_addr.as_u64() + boot_info.physical_memory_offset;
-            let ptr = VirtAddr::new(virt_addr).as_mut_ptr();
-            let l3_table: &PageTable = unsafe { &*ptr };
+    // for (i, entry) in l4_table.iter().enumerate() {
+    //     if !entry.is_unused() {
+    //         println!("L4 entry {}: {:?}", i, entry);
 
-            for (i, entry) in l3_table.iter().enumerate() {
-                if !entry.is_unused() {
-                    println!("L3 Entry: {}: {:?}", i, entry);
-                }
-            }
-        }
-    }
+    //         // retrieve physical address from entry and convert it
+    //         let phys_addr = entry.frame().unwrap().start_address();
+    //         let virt_addr = phys_addr.as_u64() + boot_info.physical_memory_offset;
+    //         let ptr = VirtAddr::new(virt_addr).as_mut_ptr();
+    //         let l3_table: &PageTable = unsafe { &*ptr };
+
+    //         for (i, entry) in l3_table.iter().enumerate() {
+    //             if !entry.is_unused() {
+    //                 println!("L3 Entry: {}: {:?}", i, entry);
+    //             }
+    //         }
+    //     }
+    // }
 
     init_descriptor_tables();
     init_PICs();

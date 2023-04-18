@@ -6,6 +6,7 @@
 
 // the x86-interrupt calling convention is an unstable feature we need to mark it as such 
 #![feature(abi_x86_interrupt)]
+#![allow(unused_imports)]
 
 // rust has a test framework that it provides by default but it is built into the std lib
 // and depends on the test crate
@@ -88,7 +89,7 @@ pub fn test_panic_handler(info: &PanicInfo) -> ! {
 }
 
 #[cfg(test)]
-fn test_kernel_main(boot_info: &'static BootInfo) -> ! {
+fn test_kernel_main(_boot_info: &'static BootInfo) -> ! {
     test_main();
     hlt_loop();
 }

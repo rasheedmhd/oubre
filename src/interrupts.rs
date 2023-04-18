@@ -15,7 +15,7 @@ use x86_64::registers::control::Cr2;
 use x86_64::instructions::port::Port; 
 use pc_keyboard::{
     layouts, 
-    DecodedKey, 
+    //DecodedKey, 
     HandleControl, 
     Keyboard,
     ScancodeSet1
@@ -131,9 +131,9 @@ extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: InterruptStackFr
     }
 }
 
-static mut caps_lock_state: bool = false;
+static mut CAPS_LOCK_STATE: bool = false;
 
-extern "x86-interrupt" fn keyboard_interrupt_handler(stack_frame: InterruptStackFrame) 
+extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: InterruptStackFrame) 
 {
 
     // lazy_static! {
@@ -154,7 +154,7 @@ extern "x86-interrupt" fn keyboard_interrupt_handler(stack_frame: InterruptStack
         PICS.lock()
         .notify_end_of_interrupt(InterruptIndex::Keyboard.as_u8());
 
-        let mut keyboard = KEYBOARD.lock();
+        let mut _keyboard = KEYBOARD.lock();
         let mut port = Port::new(0x60);
     
         let scancode: u8 = port.read();
@@ -165,14 +165,14 @@ extern "x86-interrupt" fn keyboard_interrupt_handler(stack_frame: InterruptStack
             0x09 => Some("8"),
             0x1E => Some("A"),
             0x3A => {
-                caps_lock_state = !caps_lock_state;
+                CAPS_LOCK_STATE = !CAPS_LOCK_STATE;
                 None
             },
     
             _ => None
         };
     
-        if caps_lock_state {
+        if CAPS_LOCK_STATE {
             if let Some(scancode) = key {
                 print!("{}U", scancode);
             };
