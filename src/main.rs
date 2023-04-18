@@ -6,7 +6,10 @@
 
 use core::panic::PanicInfo;
 use oubre_os::{
-        memory::active_level_4_table,
+        memory::{
+            active_level_4_table,
+            translate_addr,
+        },
         gdt, 
         interrupts, 
         print, 
@@ -48,6 +51,25 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     ");
 
     let phys_mem_offset = VirtAddr::new(boot_info.physical_memory_offset);
+
+    let addresses = [
+        // the identity-mapped vga buffer page
+        0xb8000,
+        // some code page
+        0x201008,
+        // some stack page
+        0x0100_0020_1a10,
+        // virtual address mapped to physical address 0
+        boot_info.physical_memory_offset,
+    ];
+    for &address in &addresses {
+        let virt_addr = VirtAddr::new(address);
+        let phys_addr = unsafe { 
+            translate_addr(virt_addr, phys_mem_offset) 
+        };
+        println!("{:?} -> {:?}", virt_addr, phys_addr);
+    }
+    
     let l4_table = unsafe { 
         active_level_4_table(phys_mem_offset) 
     };
