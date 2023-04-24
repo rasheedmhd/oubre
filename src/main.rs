@@ -7,8 +7,9 @@
 
 use core::panic::PanicInfo;
 use oubre_os::{
-        memory,
-        gdt, 
+    memory,
+    memory::active_level_4_table,
+    gdt, 
         interrupts, 
         //print, 
         println,
@@ -24,9 +25,9 @@ use x86_64::{
     //registers::control::Cr3,
     VirtAddr,
     structures::paging::{
-        //PageTable,
+        PageTable,
         Translate,
-    },
+    }, PhysAddr,
 };
 
 
@@ -77,27 +78,38 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
         println!("{:?} -> {:?}", virt_addr, phys_addr);
     }
 
-    // let l4_table = unsafe { 
-    //     active_level_4_table(phys_mem_offset) 
-    // };
+    let l4_table = unsafe { 
+        active_level_4_table(phys_mem_offset) 
+    };
 
-    // for (i, entry) in l4_table.iter().enumerate() {
-    //     if !entry.is_unused() {
-    //         println!("L4 entry {}: {:?}", i, entry);
+    for (i, entry) in l4_table.iter().enumerate() {
+        if !entry.is_unused() {
+            println!("L4 entry {}: {:?}", i, entry);
 
-    //         // retrieve physical address from entry and convert it
-    //         let phys_addr = entry.frame().unwrap().start_address();
-    //         let virt_addr = phys_addr.as_u64() + boot_info.physical_memory_offset;
-    //         let ptr = VirtAddr::new(virt_addr).as_mut_ptr();
-    //         let l3_table: &PageTable = unsafe { &*ptr };
+            // retrieve physical address from entry and convert it
+            let phys_addr = entry.frame().unwrap().start_address();
+            let virt_addr = phys_addr.as_u64() + boot_info.physical_memory_offset;
+            let ptr = VirtAddr::new(virt_addr).as_mut_ptr();
+            let l3_table: &PageTable = unsafe { &*ptr };
 
-    //         for (i, entry) in l3_table.iter().enumerate() {
-    //             if !entry.is_unused() {
-    //                 println!("L3 Entry: {}: {:?}", i, entry);
-    //             }
-    //         }
-    //     }
-    // }
+            for (i, entry) in l3_table.iter().enumerate() {
+                if !entry.is_unused() {
+                    println!("L3 Entry: {}: {:?}", i, entry);
+                    
+                    let phys_addr = entry.frame().unwrap().start_address();
+                    let virt_addr = boot_info.physical_memory_offset + phys_addr.as_u64();
+                    let ptr = VirtAddr::new(virt_addr).as_mut_ptr();
+                    let l2_page_table: &PageTable = unsafe { &*ptr };
+                    
+                    for (i, entry) in l2_page_table.iter().enumerate() {
+                        if !entry.is_unused() {
+                            println!("L2 Entry: {}: {:?}", i, entry);
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     init_descriptor_tables();
     init_PICs();
