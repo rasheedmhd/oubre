@@ -36,6 +36,16 @@ pub fn create_example_mapping<T: FrameAllocator<Size4KiB>> (
     }
 }
 
+/// A FrameAllocator that always return 'None'.
+
+pub struct EmptyFrameAllocator;
+
+unsafe impl FrameAllocator<Size4KiB> for EmptyFrameAllocator {
+    fn allocate_frame(&mut self) -> Option<PhysFrame> {
+        None
+    }
+}
+
 pub unsafe fn init(physical_mem_offset: VirtAddr) 
 -> OffsetPageTable<'static> 
 {
