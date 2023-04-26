@@ -1,13 +1,40 @@
 use x86_64::{
     structures::paging::{
-        //page_table::FrameError,
+        Page,
         PageTable,
         OffsetPageTable,
+        page_table::FrameError,
+        PageTableFlags as Flags,
+        PhysFrame,
+        Mapper,
+        Size4KiB,
+        FrameAllocator,
     },
     registers::control::Cr3,
     VirtAddr,
-    //PhysAddr,
+    PhysAddr,
 };
+
+pub fn create_example_mapping<T: FrameAllocator<Size4KiB>> (
+    page: Page,
+    mapper: &mut OffsetPageTable,
+    frame_allocator: &mut T,
+) {
+    let frame = PhysFrame::containing_address(PhysAddr::new(0xb8000));
+    let flags = Flags::PRESENT | Flags::WRITABLE; 
+
+    // let map_to_result = unsafe {
+    //     // FIXME: this is not safe, we do it only for testing
+    //     mapper.map_to(page, frame, flags, frame_allocator)
+    // };
+    // map_to_result.expect("map_to failed").flush();
+
+    // unsafe because the caller must ensure that the frame is not already in use
+    // mapping a frame twice could lead to UB
+    unsafe {
+        mapper.map_to(page, frame, flags, frame_allocator).expect("map_to failed").flush();
+    }
+}
 
 pub unsafe fn init(physical_mem_offset: VirtAddr) 
 -> OffsetPageTable<'static> 
@@ -16,7 +43,7 @@ pub unsafe fn init(physical_mem_offset: VirtAddr)
     OffsetPageTable::new(level_4_table, physical_mem_offset)
 }
 
-pub unsafe fn active_level_4_table(physical_mem_offset: VirtAddr) 
+unsafe fn active_level_4_table(physical_mem_offset: VirtAddr) 
 -> &'static mut PageTable
 {
     let (level_4_table_frame, _) = Cr3::read();
@@ -28,13 +55,15 @@ pub unsafe fn active_level_4_table(physical_mem_offset: VirtAddr)
 
 // Translates a given virtual address into physical address or None if 
 // the virtual address is not mapped
+
 // pub unsafe fn translate_addr(addr: VirtAddr, physical_mem_offset: VirtAddr) 
 // -> Option<PhysAddr> 
 // {
 //     safe_translate_addr(addr, physical_mem_offset)
 // }
 
-// Private function called by translate_addr
+// //Private function called by translate_addr
+
 // fn safe_translate_addr(addr: VirtAddr, physical_mem_offset: VirtAddr)
 // -> Option<PhysAddr>
 // {

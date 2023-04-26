@@ -8,7 +8,10 @@
 use core::panic::PanicInfo;
 use oubre_os::{
     memory,
-    //memory::active_level_4_table,
+    // memory::{
+    //     active_level_4_table,
+    //     translate_addr,
+    // },
     gdt, 
         interrupts, 
         //print, 
@@ -23,12 +26,12 @@ use bootloader::{
 use x86_64::{
     instructions::interrupts as hardware_interrupts,
     //registers::control::Cr3,
+    //PhysAddr,
     VirtAddr,
     structures::paging::{
-        //PageTable,
+        PageTable,
         Translate,
     }, 
-    //PhysAddr,
 };
 
 
