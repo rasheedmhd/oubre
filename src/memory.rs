@@ -15,6 +15,29 @@ use x86_64::{
     PhysAddr,
 };
 
+use bootloader::bootinfo::MemoryMap;
+
+/// A FrameAllocator that returns usable frames from the bootloader's memory map.
+pub struct BootInfoFrameAllocator {
+    memory_map: &'static MemoryMap,
+    next: usize,
+}
+
+impl BootInfoFrameAllocator {
+    //// Creating a FrameAllocator from the passed memory map
+    /// 
+    /// This function is unsafe because the caller must guarantee that the 
+    /// memory map passed is valid. The main requirement is that all frames 
+    /// that are marked as 'USABLE' in it are really unused
+    pub unsafe fn init(memory_map: &'static MemoryMap) -> Self {
+        BootInfoFrameAllocator {
+            memory_map,
+            next: 0,
+        }
+    }
+}
+
+
 pub fn create_example_mapping<T: FrameAllocator<Size4KiB>> (
     page: Page,
     mapper: &mut OffsetPageTable,
