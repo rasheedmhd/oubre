@@ -8,6 +8,8 @@
 #![feature(abi_x86_interrupt)]
 #![allow(unused_imports)]
 
+extern crate alloc;
+
 // rust has a test framework that it provides by default but it is built into the std lib
 // and depends on the test crate
 // since we are not linking the std lib, we need to spin up our own custom test framework
@@ -23,6 +25,7 @@ pub mod serial;
 pub mod interrupts;
 pub mod gdt;
 pub mod memory;
+pub mod allocator;
 
 use core::panic::PanicInfo;
 use x86_64::instructions::port::Port;
@@ -31,6 +34,7 @@ use bootloader::{
     BootInfo,
     entry_point
 };
+
 
 #[cfg(test)]
 entry_point!(test_kernel_main);
