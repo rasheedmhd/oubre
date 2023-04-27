@@ -35,6 +35,7 @@ pc-keyboard = "0.5.0"
 # pic8259 = { version = "0.10.2", path = "../../contrib/pic8259" }
 pic8259 = { version = "0.10.2", path = "../../contrib/pic8259" }
 #pic8259 = "0.10.2"
+linked_list_allocator = "0.9.0"
 
 [dependencies.lazy_static]
 version = "1.0"

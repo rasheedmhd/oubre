@@ -40,7 +40,12 @@ use x86_64::{
     }, 
 };
 
-use alloc::boxed::Box;
+use alloc::{
+    boxed::Box,
+    vec,
+    vec::Vec,
+    rc::Rc
+};
 
 
 entry_point!(kernel_main);
@@ -102,8 +107,28 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     allocator::init_heap(&mut mapper, &mut frame_allocator)
     .expect("heap initialization failed");
 
-    let x = Box::new(41);
+    // allocating a number on the heap
+    let heap_num = Box::new(41);
+    println!("heap number at {:p}", heap_num);
+    
+    // creating a dynamically sized vector
+    let mut vec = Vec::new();
+    for i in 0..500 {
+        vec.push(i);
+    }
+    println!("vec at {:p}", vec.as_slice());
+    
+    // creating a reference countr vector that will be freed with when reaches 0
+    let ref_counted = Rc::new(vec![1,2,3]);
+    let cloned_ref = ref_counted.clone();
+    println!("current reference count is {}", Rc::strong_count(&cloned_ref));
+    let cloned_ref2 = cloned_ref.clone();
+    println!("current reference count is {}", Rc::strong_count(&cloned_ref2));
+    core::mem::drop(ref_counted);
+    println!("current reference count is {} now", Rc::strong_count(&cloned_ref));
 
+
+    
     init_descriptor_tables();
     init_PICs();
     

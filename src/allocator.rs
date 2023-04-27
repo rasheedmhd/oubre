@@ -17,11 +17,14 @@ use x86_64::{
 
 use core::ptr::null_mut;
 
+use linked_list_allocator::LockedHeap;
+
 pub const HEAP_START: usize = 0x_4444_4444_0000;
 pub const HEAP_SIZE: usize = 100 * 1024; // 100KiB
 
 #[global_allocator]
-static ALLOCATOR: Dummy = Dummy;
+// static ALLOCATOR: Dummy = Dummy; 
+static ALLOCATOR: LockedHeap = LockedHeap::empty();
 
 pub struct Dummy; 
 
@@ -64,5 +67,10 @@ where
             mapper.map_to(page, frame, flags, frame_allocator)?.flush()
         };
     };
+
+    unsafe {
+        ALLOCATOR.lock().init(HEAP_START, HEAP_SIZE);
+    }
+    
     Ok(())
 }
