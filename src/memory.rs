@@ -59,6 +59,14 @@ impl BootInfoFrameAllocator {
     }
 }
 
+unsafe impl FrameAllocator<Size4KiB> for BootInfoFrameAllocator {
+    fn allocate_frame(&mut self) -> Option<PhysFrame> {
+        let frame = self.usable_frames().nth(self.next);
+        self.next += 1;
+        frame
+    }
+}
+
 
 pub fn create_example_mapping<T: FrameAllocator<Size4KiB>> (
     page: Page,
