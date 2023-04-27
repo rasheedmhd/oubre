@@ -1,11 +1,13 @@
 #![no_std]
 #![cfg_attr(test, no_main)]
-#![feature(custom_test_frameworks)]
+// the x86-interrupt calling convention is an unstable feature we need to mark it as such 
+// we need the denote a function with alloc_error_handler to handle the error when 
+// the alloc function returns a null pointer (null_mut())
+#![feature(custom_test_frameworks, abi_x86_interrupt, alloc_error_handler)]
 #![test_runner(crate::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
-// the x86-interrupt calling convention is an unstable feature we need to mark it as such 
-#![feature(abi_x86_interrupt)]
+// #![feature(abi_x86_interrupt, alloc_error_handler)]
 #![allow(unused_imports)]
 
 extern crate alloc;
@@ -109,4 +111,9 @@ fn panic(info: &PanicInfo) -> ! {
 
 pub fn hlt_loop() -> ! {
     loop { x86_64::instructions::hlt(); }
+}
+
+#[alloc_error_handler]
+fn alloc_error_handler(layout: alloc::alloc::Layout) -> ! {
+    panic!("allocation error: {:?}", layout)
 }
