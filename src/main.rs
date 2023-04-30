@@ -10,15 +10,9 @@ extern crate alloc;
 use core::panic::PanicInfo;
 use oubre_os::{
     memory,
-    memory::{
-        // active_level_4_table,
-        // translate_addr,
-        // EmptyFrameAllocator,
-        BootInfoFrameAllocator,
-    },
+    memory::{ BootInfoFrameAllocator },
     gdt, 
         interrupts, 
-        //print, 
         println, 
         allocator,
     };
@@ -30,14 +24,8 @@ use bootloader::{
 
 use x86_64::{
     instructions::interrupts as hardware_interrupts,
-    //registers::control::Cr3,
-    //PhysAddr,
     VirtAddr,
-    structures::paging::{
-        //PageTable,
-        Page,
-        //Translate,
-    }, 
+    structures::paging::Page,
 };
 
 use alloc::{
@@ -80,30 +68,6 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     let page = Page::containing_address(VirtAddr::new(0x89980000));
     memory::create_example_mapping(page, &mut mapper, &mut frame_allocator);
 
-    // write the string 'New!' to the screen through the new mapping 
-    // let page_ptr: *mut u64 = page.start_address().as_mut_ptr();
-    // unsafe {
-    //     page_ptr.offset(400).write_volatile(0x_f021_f077_f065_f04e)
-    // };
-
-
-    // let addresses = [
-    //     // the identity-mapped vga buffer page
-    //     0xb8000,
-    //     // some code page
-    //     0x201008,
-    //     // some stack page
-    //     0x0100_0020_1a10,
-    //     // virtual address mapped to physical address 0
-    //     boot_info.physical_memory_offset,
-    // ];
-    
-    // for &address in &addresses {
-    //     let virt_addr = VirtAddr::new(address);
-    //     let phys_addr = mapper.translate_addr(virt_addr);
-    //     println!("{:?} -> {:?}", virt_addr, phys_addr);
-    // }
-
     allocator::init_heap(&mut mapper, &mut frame_allocator)
     .expect("heap initialization failed");
 
@@ -118,7 +82,7 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     }
     println!("vec at {:p}", vec.as_slice());
     
-    // creating a reference countr vector that will be freed with when reaches 0
+    // creating a reference counter vector that will be freed with when reaches 0
     let ref_counted = Rc::new(vec![1,2,3]);
     let cloned_ref = ref_counted.clone();
     println!("current reference count is {}", Rc::strong_count(&cloned_ref));

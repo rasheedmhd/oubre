@@ -48,3 +48,28 @@
 
 
     // If you are not failing a lot, you are probably not being as creative as you could be - you aren't stretching your imagination - John Backus, Creator of FORTRAN
+
+    
+    // write the string 'New!' to the screen through the new mapping 
+    // let page_ptr: *mut u64 = page.start_address().as_mut_ptr();
+    // unsafe {
+    //     page_ptr.offset(400).write_volatile(0x_f021_f077_f065_f04e)
+    // };
+
+
+    // let addresses = [
+    //     // the identity-mapped vga buffer page
+    //     0xb8000,
+    //     // some code page
+    //     0x201008,
+    //     // some stack page
+    //     0x0100_0020_1a10,
+    //     // virtual address mapped to physical address 0
+    //     boot_info.physical_memory_offset,
+    // ];
+    
+    // for &address in &addresses {
+    //     let virt_addr = VirtAddr::new(address);
+    //     let phys_addr = mapper.translate_addr(virt_addr);
+    //     println!("{:?} -> {:?}", virt_addr, phys_addr);
+    // }
