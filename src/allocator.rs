@@ -1,6 +1,14 @@
+pub mod bump;
+
+
 use alloc::alloc::{
     GlobalAlloc,
     Layout,
+};
+
+use spin::{
+    Mutex,
+    MutexGuard,
 };
 
 use x86_64::{
@@ -71,6 +79,24 @@ where
     unsafe {
         ALLOCATOR.lock().init(HEAP_START, HEAP_SIZE);
     }
-    
+
     Ok(())
+}
+
+
+/// A wrapper around spin::Mutex to permit trait implementations
+pub struct Locked<A> {
+    inner: Mutex<A>,
+}
+
+impl<A> Locked<A> {
+    pub const fn new(inner: A) -> Self {
+        Locked {
+            inner: Mutex::new(inner),
+        }
+    }
+
+    pub fn lock(&self) -> MutexGuard<A> {
+        self.inner.lock()
+    }
 }
