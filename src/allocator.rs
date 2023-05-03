@@ -27,12 +27,15 @@ use core::ptr::null_mut;
 
 use linked_list_allocator::LockedHeap;
 
+use bump::BumpAllocator;
+
 pub const HEAP_START: usize = 0x_4444_4444_0000;
 pub const HEAP_SIZE: usize = 100 * 1024; // 100KiB
 
 #[global_allocator]
+static ALLOCATOR: Locked<BumpAllocator> = Locked::new(BumpAllocator::new());
 // static ALLOCATOR: Dummy = Dummy; 
-static ALLOCATOR: LockedHeap = LockedHeap::empty();
+// static ALLOCATOR: LockedHeap = LockedHeap::empty();
 
 pub struct Dummy; 
 
@@ -99,4 +102,15 @@ impl<A> Locked<A> {
     pub fn lock(&self) -> MutexGuard<A> {
         self.inner.lock()
     }
+}
+
+/// Align the given address 'addr' upwards to alignment 'align'.
+fn align_up(addr: usize, align: usize) -> usize {
+    ( addr + align - 1) & !(align -1)
+    // let remainder = addr % align;
+    // if remainder == 0 {
+    //     addr // addr already aligned
+    // } else {
+    //     addr - remainder + align
+    // }
 }
