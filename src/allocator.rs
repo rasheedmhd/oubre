@@ -1,5 +1,6 @@
+/// Allocators 
 pub mod bump;
-
+pub mod linked_list;
 
 use alloc::alloc::{
     GlobalAlloc,
@@ -106,11 +107,11 @@ impl<A> Locked<A> {
 
 /// Align the given address 'addr' upwards to alignment 'align'.
 fn align_up(addr: usize, align: usize) -> usize {
-    ( addr + align - 1) & !(align -1)
-    // let remainder = addr % align;
-    // if remainder == 0 {
-    //     addr // addr already aligned
-    // } else {
-    //     addr - remainder + align
-    // }
+    // ( addr + align - 1) & !(align -1)
+    let remainder = addr % align;
+    if remainder == 0 {
+        addr // addr already aligned
+    } else {
+        addr - remainder + align
+    }
 }

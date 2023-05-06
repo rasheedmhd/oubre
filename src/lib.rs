@@ -4,6 +4,7 @@
 // we need the denote a function with alloc_error_handler to handle the error when 
 // the alloc function returns a null pointer (null_mut())
 #![feature(custom_test_frameworks, abi_x86_interrupt, alloc_error_handler)]
+#![feature(const_mut_refs)]
 #![test_runner(crate::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
