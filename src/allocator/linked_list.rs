@@ -55,4 +55,25 @@ impl LinkedListAllocator {
         self.head.next = Some(&mut *node_ptr)
     }
 
+    /// Looks for a free mem region with the given size and alignment and removes it from the list
+    /// Returns the list node and the start address of the allocated mem
+    fn find_region(&mut self, size: usize, align: usize) 
+    -> Option<(&'static mut ListNode, usize)>
+    {
+        // reference to current list node, updated on each iteration
+        let mut current_node = &mut self.head;
+        // searching for large suitable mem region in the linkedlist
+        while let Some(ref mut region) = current_node.next {
+            if let Ok(alloc_start) = Self::alloc_from_region(&region, size, align) {
+                // suitable region for removal
+                let next = region.next.take();
+                let ret = Some((current_node.next.take().unwrap(), alloc_start));
+                current_node.next = next;
+                return ret;
+            } else {
+                current_node = current_node.next.as_mut().unwrap();
+            }
+        }
+        None
+    }
 }
