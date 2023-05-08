@@ -11,6 +11,7 @@ use alloc::alloc::{
     Layout,
     GlobalAlloc,
 };
+use pc_keyboard::layouts;
 
 
 struct ListNode {
@@ -34,7 +35,7 @@ impl ListNode {
 
 unsafe impl GlobalAlloc for Locked<LinkedListAllocator> {
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
-        // perform layout adjustments 
+        // layout adjustments to ensure that the allocated region can store a ListNode
         let (size, align) = LinkedListAllocator::size_align(layout);
         let mut allocator = self.lock();
 
@@ -51,7 +52,7 @@ unsafe impl GlobalAlloc for Locked<LinkedListAllocator> {
     }
 
     unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
-        // layout adjustments 
+        // layout adjustments to ensure that the allocated region can store a ListNode
         let (size, _) = LinkedListAllocator::size_align(layout);
 
         self.lock().add_free_region(ptr as usize, size)
@@ -134,5 +135,15 @@ impl LinkedListAllocator {
 
         // region suitable for allocation
         Ok(alloc_start)
+    }
+
+    /// Adjust the layout to ensure the the allocated memory is large enough to store a ListNode
+    /// Returns a tuple of the size and alignment
+    fn size_align(layout: Layout) -> (usize, usize) {
+        let layout = layout.align_to(mem::size_of::<ListNode>())
+            .expect("alignment adjustment failed")
+            .pad_to_align();
+        let size = layout.size().max(mem::size_of::<ListNode>());
+        (size, layout.align())
     }
 }
