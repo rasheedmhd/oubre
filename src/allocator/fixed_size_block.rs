@@ -5,7 +5,14 @@ use alloc::alloc::{
 
 
 
-use core::ptr::null_mut;
+use core::{
+    mem,
+    ptr::{
+        null_mut,
+        NonNull,
+    },
+};
+
 use super::Locked;
 
 struct ListNode {
@@ -41,7 +48,24 @@ unsafe impl GlobalAlloc for Locked<FSBAllocator> {
     }
 
     unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
-        todo!();
+        let mut allocator = self.lock();
+        match best_fit_index(&layout) {
+            Some(index) => {
+                let new_node = ListNode {
+                    next: allocator.list_heads[index].take(),
+                };
+                // Verifying that the Block is capable of storing a node
+                assert!(mem::size_of::<ListNode>() <= BLOCK_SIZES[index]);
+                assert!(mem::align_of::<ListNode>() <= BLOCK_SIZES[index]);
+                let new_node_ptr = ptr as *mut ListNode;
+                new_node_ptr.write(new_node);
+                allocator.list_heads[index] = Some(&mut *new_node_ptr);
+            }
+            None => {
+                let ptr = NonNull::new(ptr).unwrap();
+                allocator.fallback_allocator.deallocate(ptr, layout);
+            }
+        }
     }
 }
 
