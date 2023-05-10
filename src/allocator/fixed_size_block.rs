@@ -3,14 +3,47 @@ use alloc::alloc::{
     GlobalAlloc,
 };
 
+
+
 use core::ptr::null_mut;
+use super::Locked;
 
 struct ListNode {
     // all nodes have the same fixed size
     next: Option<&'static mut ListNode>
 }
 
+unsafe impl GlobalAlloc for Locked<FSBAllocator> {
+    unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
+        let mut allocator = self.lock();
+        match best_fit_index(&layout) {
+            Some(index) => {
+                match allocator.list_heads[index].take() {
+                    Some(node) => {
+                        allocator.list_heads[index] = node.next.take();
+                        node as *mut ListNode as *mut u8
+                    }
+                    None => {
+                        // // no block exist, so we create a new block allocation
+                        // let block_size =  BLOCK_SIZES[index];
+                        // // only works on block size of power 2
+                        // let block_align = block_size;
 
+                        let (size, align) = (BLOCK_SIZES[index], BLOCK_SIZES[index]);
+                        let layout = Layout::from_size_align(size, align)
+                            .unwrap();
+                        allocator.fallback_alloc(layout)
+                    }
+                }
+            }
+            None => allocator.fallback_alloc(layout),
+        }
+    }
+
+    unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
+        todo!();
+    }
+}
 
 
 /// block sizes
@@ -42,4 +75,14 @@ impl FSBAllocator {
             Err(_) => null_mut(),
         }
     }
+
+}
+
+// Choose the best fitting block size for a given layout
+// Returns an index into the BLOCK_SIZES array
+// which is used as an index into the list_heads array
+fn best_fit_index(layout: &Layout) -> Option<usize> {
+    let required_block_size = layout.size().max(layout.align());
+    // Returns an Option of the index 
+    BLOCK_SIZES.iter().position( |&s| s >= required_block_size )
 }
