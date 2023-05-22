@@ -134,33 +134,31 @@ extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: InterruptStackFr
 
 extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: InterruptStackFrame) 
 {
+  
+    let mut port = Port::new(0x60);
+    let scancode: u8 = unsafe { port.read() };
+    crate::task::keyboard::add_scancode(scancode);
 
-    lazy_static! {
-        static ref KEYBOARD: Mutex<Keyboard<layouts::Us104Key, ScancodeSet1>> = {
-            let keyboard = Mutex::new(Keyboard::new(layouts::Us104Key, ScancodeSet1, HandleControl::Ignore));
-            keyboard
-        };
-    }
-
-    unsafe {
-        
+    unsafe {   
         PICS.lock()
         .notify_end_of_interrupt(InterruptIndex::Keyboard.as_u8());
-
-        let mut keyboard = KEYBOARD.lock();
-        let mut port = Port::new(0x60);
-
-        let scancode: u8 = port.read();
-
-        if let Ok(Some(key_event)) = keyboard.add_byte(scancode) {
-            if let Some(key) = keyboard.process_keyevent(key_event) {
-                match key {
-                    DecodedKey::Unicode(character) => print!("{}", character),
-                    DecodedKey::RawKey(key) => print!("{:?}", key),
-                }
-            }
-        }
-
     }
 
 }
+
+
+// lazy_static! {
+//     static ref KEYBOARD: Mutex<Keyboard<layouts::Us104Key, ScancodeSet1>> = {
+//         let keyboard = Mutex::new(Keyboard::new(layouts::Us104Key, ScancodeSet1, HandleControl::Ignore));
+//         keyboard
+//     };
+// }
+// let mut keyboard = KEYBOARD.lock();
+// if let Ok(Some(key_event)) = keyboard.add_byte(scancode) {
+//     if let Some(key) = keyboard.process_keyevent(key_event) {
+//         match key {
+//             DecodedKey::Unicode(character) => print!("{}", character),
+//             DecodedKey::RawKey(key) => print!("{:?}", key),
+//         }
+//     }
+// }

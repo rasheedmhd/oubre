@@ -9,6 +9,7 @@ use core::{
 use alloc::boxed::Box;
 
 pub mod simple_executor;
+pub mod keyboard;
 
 pub struct Task {
     // A task returns nothing, all we need is its effect.
