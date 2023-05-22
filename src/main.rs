@@ -113,6 +113,16 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     test_main();
 
     oubre_os::hlt_loop();
+
+    // MULTITASKING
+    async fn async_number() -> u32 {
+        42
+    }
+
+    async fn example_task() {
+        let number = async_number().await;
+        println!("async number: {}", number);
+    }
     
 }
 

@@ -30,6 +30,7 @@ pub mod interrupts;
 pub mod gdt;
 pub mod memory;
 pub mod allocator;
+pub mod task;
 
 use core::panic::PanicInfo;
 use x86_64::instructions::port::Port;
