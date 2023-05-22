@@ -63,6 +63,11 @@ features = ["alloc"]
 version = "0.2.0"
 default-features = false
 
+[dependencies.futures-util]
+version = "0.3.4"
+default-features = false
+features = ["alloc"]
+
 # for integration test that have only one test funcs,
 # we can run them as executables by calling them 
 # in the entry point function - without needing the test runner
