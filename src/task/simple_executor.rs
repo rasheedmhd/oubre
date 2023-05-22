@@ -6,6 +6,7 @@ use core::task::{
     RawWaker, 
     Context,
     RawWakerVTable,
+    Poll,
 };
 
 pub struct SimpleExecutor {
@@ -19,8 +20,25 @@ impl SimpleExecutor {
         }
     }
 
+    // adds a new task to the task_queue at the end
     pub fn spawn(&mut self, task: Task) {
         self.task_queue.push_back(task)
+    }
+
+    pub fn run(&mut self) {
+        // check the task queue and remove the first task or None if task_queue is empty
+        // capture the task and poll it
+        while let Some(mut task) = self.task_queue.pop_front() {
+            let waker = dummy_waker();
+            // create a context, remember that a context is a wrapper around a waker
+            // so precede it with a waker instance's creation. 
+            let mut context = Context::from_waker(&waker);
+            match task.poll(&mut context) {
+                Poll::Ready(()) => {} // task has been completed 
+                // Task not completed yet, return task back to the task_queue 
+                Poll::Pending => self.task_queue.push_back(task),
+            }
+        }
     }
 }
 
