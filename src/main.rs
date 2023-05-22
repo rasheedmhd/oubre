@@ -35,6 +35,12 @@ use alloc::{
     rc::Rc
 };
 
+// MULTITASKING
+use oubre_os::task::{
+    Task,
+    simple_executor::SimpleExecutor
+};
+
 
 entry_point!(kernel_main);
 
@@ -108,13 +114,12 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
             hardware_interrupts::enable();         
         }
     }
-    
-    #[cfg(test)]
-    test_main();
-
-    oubre_os::hlt_loop();
 
     // MULTITASKING
+    let mut executor = SimpleExecutor::new();
+    executor.spawn(Task::new(example_task()));
+    executor.run();
+    
     async fn async_number() -> u32 {
         42
     }
@@ -123,6 +128,11 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
         let number = async_number().await;
         println!("async number: {}", number);
     }
+    
+    #[cfg(test)]
+    test_main();
+
+    oubre_os::hlt_loop();
     
 }
 
