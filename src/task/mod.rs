@@ -14,6 +14,7 @@ use alloc::boxed::Box;
 
 pub mod simple_executor;
 pub mod keyboard;
+pub mod executor;
 
 pub struct Task {
     id: TaskId,
