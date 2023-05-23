@@ -38,7 +38,8 @@ use alloc::{
 // MULTITASKING
 use oubre_os::task::{
     Task,
-    simple_executor::SimpleExecutor
+    simple_executor::SimpleExecutor,
+    keyboard::print_keypresses,
 };
 
 
@@ -118,6 +119,7 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     // MULTITASKING
     let mut executor = SimpleExecutor::new();
     executor.spawn(Task::new(example_task()));
+    executor.spawn(Task::new(print_keypresses()));
     executor.run();
     
     async fn async_number() -> u32 {

@@ -24,3 +24,20 @@
 // }
 
 
+
+
+// lazy_static! {
+//     static ref KEYBOARD: Mutex<Keyboard<layouts::Us104Key, ScancodeSet1>> = {
+//         let keyboard = Mutex::new(Keyboard::new(layouts::Us104Key, ScancodeSet1, HandleControl::Ignore));
+//         keyboard
+//     };
+// }
+// let mut keyboard = KEYBOARD.lock();
+// if let Ok(Some(key_event)) = keyboard.add_byte(scancode) {
+//     if let Some(key) = keyboard.process_keyevent(key_event) {
+//         match key {
+//             DecodedKey::Unicode(character) => print!("{}", character),
+//             DecodedKey::RawKey(key) => print!("{:?}", key),
+//         }
+//     }
+// }

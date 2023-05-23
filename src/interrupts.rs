@@ -11,16 +11,8 @@ use x86_64::structures::idt::{
 };
 
 use x86_64::registers::control::Cr2;
-//------------------------------------ keyboard_interrupt_handler imports
 use x86_64::instructions::port::Port; 
-use pc_keyboard::{
-    layouts, 
-    DecodedKey, 
-    HandleControl, 
-    Keyboard,
-    ScancodeSet1
-};
-//------------------------------------ end of keyboard_interrupt_handler
+
 
 use lazy_static::lazy_static;
 use pic8259::ChainedPics;
@@ -146,19 +138,3 @@ extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: InterruptStac
 
 }
 
-
-// lazy_static! {
-//     static ref KEYBOARD: Mutex<Keyboard<layouts::Us104Key, ScancodeSet1>> = {
-//         let keyboard = Mutex::new(Keyboard::new(layouts::Us104Key, ScancodeSet1, HandleControl::Ignore));
-//         keyboard
-//     };
-// }
-// let mut keyboard = KEYBOARD.lock();
-// if let Ok(Some(key_event)) = keyboard.add_byte(scancode) {
-//     if let Some(key) = keyboard.process_keyevent(key_event) {
-//         match key {
-//             DecodedKey::Unicode(character) => print!("{}", character),
-//             DecodedKey::RawKey(key) => print!("{:?}", key),
-//         }
-//     }
-// }
