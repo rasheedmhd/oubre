@@ -21,6 +21,14 @@ pub struct Executor {
 }
 
 impl Executor {
+    pub fn new() -> Self {
+        Executor { 
+            tasks: BTreeMap::new(), 
+            // task IDs
+            task_queue: Arc::new(ArrayQueue::new(100)), 
+            waker_cache: BTreeMap::new(),
+        }
+    }
     pub fn spawn(&mut self, task: Task) {
         let task_id = task.id;
         if self.tasks.insert(task.id, task).is_some() {
@@ -61,6 +69,12 @@ impl Executor {
             }
         }
     }
+
+    pub fn run(&mut self) -> ! {
+        loop {
+            self.run_ready_tasks();
+        }
+    }
 }
 
 struct TaskWaker {
@@ -69,16 +83,17 @@ struct TaskWaker {
 }
 
 impl TaskWaker {
-    fn wake_task(&self) {
-        self.task_queue.push(self.task_id).expect("task_queue is full");
-    }
-    
     fn new(task_id: TaskId, task_queue: Arc<ArrayQueue<TaskId>>) -> Waker {
         Waker::from(Arc::new(TaskWaker {
             task_id,
             task_queue,
         }))
     }
+
+    fn wake_task(&self) {
+        self.task_queue.push(self.task_id).expect("task_queue is full");
+    }
+
 }
 
 impl Wake for TaskWaker {
