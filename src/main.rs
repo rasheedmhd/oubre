@@ -116,6 +116,9 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
             hardware_interrupts::enable();         
         }
     }
+        
+    #[cfg(test)]
+    test_main();
 
     // MULTITASKING
     //let mut executor = SimpleExecutor::new();
@@ -132,11 +135,6 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
         let number = async_number().await;
         println!("async number: {}", number);
     }
-    
-    #[cfg(test)]
-    test_main();
-
-    oubre_os::hlt_loop();
     
 }
 

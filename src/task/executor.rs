@@ -1,7 +1,15 @@
+use x86_64::instructions::interrupts::{
+    self,
+    enable_and_hlt,
+};
+
 use super::{
     Task,
     TaskId,
 };
+
+use crate::hlt_loop;
+
 use alloc::{
     task::Wake,
     collections::BTreeMap,
@@ -70,9 +78,23 @@ impl Executor {
         }
     }
 
-    pub fn run(&mut self) -> ! {
+    fn sleep_if_idle(&mut self) {
+        // to avoid race conditions
+        interrupts::disable();
+        if self.task_queue.is_empty() {
+           // hlt_loop();
+           // can miss task been added to queue that are added
+           // right after self.task_queue.is_empty() check before hlt_loop()
+           enable_and_hlt();
+        } else {
+            interrupts::enable();
+        }
+    }
+
+    pub fn run(&mut self) -> ! {      
         loop {
             self.run_ready_tasks();
+            self.sleep_if_idle();
         }
     }
 }
