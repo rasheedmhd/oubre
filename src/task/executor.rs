@@ -89,7 +89,7 @@ impl Executor {
         } else {
             interrupts::enable();
         }
-    }
+    } 
 
     pub fn run(&mut self) -> ! {      
         loop {
