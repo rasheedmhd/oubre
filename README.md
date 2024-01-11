@@ -4,12 +4,12 @@ Learning to build an Operating System in Rust following this curriculum, https:/
 
 
 # Todo
- Installation Guide
- Compile WASM target machine
- Refactoring 
- Commentary Notes 
- File System
- Shell
- Running processes
- GUI
- etc
+- Installation Guide
+- Compile WASM target machine
+- Refactoring 
+- Commentary Notes 
+- File System
+- Shell
+- Running processes
+- GUI
+- etc
