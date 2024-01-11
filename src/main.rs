@@ -10,7 +10,7 @@ extern crate alloc;
 use core::panic::PanicInfo;
 use oubre_os::{
     memory,
-    memory::{ BootInfoFrameAllocator },
+    memory::BootInfoFrameAllocator,
     gdt, 
         interrupts, 
         println, 
