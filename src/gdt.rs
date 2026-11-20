@@ -10,24 +10,16 @@
 //  2. call gate desc
 //  3. task-state seg
 
-
 use x86_64::{
     instructions::{
+        segmentation::{Segment, CS},
         tables::load_tss,
-        segmentation::{
-            CS, 
-            Segment,
-        },
+    },
+    structures::{
+        gdt::{Descriptor, GlobalDescriptorTable, SegmentSelector},
+        tss::TaskStateSegment,
     },
     VirtAddr,
-    structures::{
-        tss::TaskStateSegment,
-        gdt::{
-            SegmentSelector,
-            GlobalDescriptorTable,
-            Descriptor
-        }
-    },
 };
 
 use lazy_static::lazy_static;
@@ -35,11 +27,17 @@ use lazy_static::lazy_static;
 pub const DOUBLE_FAULT_IST_INDEX: u16 = 4;
 
 lazy_static! {
-    static ref GDT: ( GlobalDescriptorTable, Selectors ) = {
+    static ref GDT: (GlobalDescriptorTable, Selectors) = {
         let mut gdt = GlobalDescriptorTable::new();
         let code_selector = gdt.add_entry(Descriptor::kernel_code_segment());
         let tss_selector = gdt.add_entry(Descriptor::tss_segment(&TSS));
-        (gdt, Selectors { code_selector, tss_selector })
+        (
+            gdt,
+            Selectors {
+                code_selector,
+                tss_selector,
+            },
+        )
     };
 }
 
@@ -66,11 +64,9 @@ lazy_static! {
 }
 
 pub fn init() {
-
     GDT.0.load(); // loading the null segment selector
     unsafe {
         CS::set_reg(GDT.1.code_selector);
         load_tss(GDT.1.tss_selector);
     }
-    
 }
