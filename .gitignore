@@ -1,4 +1,5 @@
 /target
 .vscode
 .cargo
+.idea
 .DS_Store
